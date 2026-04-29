@@ -235,6 +235,29 @@ inline void lwl_dlListSneekLast(
 }
 
 /** ****************************************************************************
+*
+* \brief	Sneek in a node to the first node pointer.
+*
+* \param	pList		Pointer to a list.
+* \param	pNode		Pointer to node that should be set as root node.
+*
+* \details	This is a much lighter operation than lwl_dlListPushFirst. The
+* 			function can be used in conjunction with lwl_dlListPeekLast to
+* 			store and read arbitrary node pointers to the list while it is
+* 			empty.
+*
+* 			A NULL pointer must be sneeked back before anything is inserted or
+* 			pushed to the list.
+*
+******************************************************************************/
+inline void lwl_dlListSneekFirst(
+	lwl_DlList *	 pList,
+	lwl_DlListNode * pNode
+) {
+	pList->sentinel.pNext = pNode;
+}
+
+/** ****************************************************************************
  *
  * 	\brief		Check if the supplied node is in a list.
  *

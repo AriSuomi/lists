@@ -100,6 +100,11 @@ extern inline void lwl_dlListSneekLast(
 	lwl_DlListNode * pNode
 );
 
+extern inline void lwl_dlListSneekFirst(
+	lwl_DlList *	 pList,
+	lwl_DlListNode * pNode
+);
+
 extern inline lwl_DlListNode * lwl_dlListPopLast(
 	lwl_DlList * pList
 );
