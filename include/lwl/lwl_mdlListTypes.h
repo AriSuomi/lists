@@ -51,7 +51,7 @@
 
 #include <stdint.h>
 
-#include <lwl/lwl_dlList.h>
+#include "lwl/lwl_dlList.h"
 
 /*******************************************************************************
 ;

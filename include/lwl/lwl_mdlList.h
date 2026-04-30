@@ -53,9 +53,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <lwl/lwl_port.h>
-#include <lwl/lwl_dlList.h>
-#include <lwl/lwl_mdlListTypes.h>
+#include "lwl/lwl_port.h"
+#include "lwl/lwl_dlList.h"
+#include "lwl/lwl_mdlListTypes.h"
 
 /*******************************************************************************
 ;

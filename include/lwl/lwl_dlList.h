@@ -53,7 +53,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <lwl/lwl_port.h>
+#include "lwl/lwl_port.h"
 
 /*******************************************************************************
 ;

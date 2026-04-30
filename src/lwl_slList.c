@@ -51,8 +51,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include <lwl/lwl_port.h>
-#include <lwl/lwl_slList.h>
+#include "lwl/lwl_port.h"
+#include "lwl/lwl_slList.h"
 
 /*******************************************************************************
 ;

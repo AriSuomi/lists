@@ -53,8 +53,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include <lwl/lwl_port.h>
-#include <lwl/lwl_ptrHeap.h>
+#include "lwl/lwl_port.h"
+#include "lwl/lwl_ptrHeap.h"
 
 /*******************************************************************************
 ;
