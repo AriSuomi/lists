@@ -40,8 +40,8 @@
  *
  ******************************************************************************/
 
-#ifndef LWO_HEAP_H_INCLUDED
-#define LWO_HEAP_H_INCLUDED
+#ifndef LWL_HEAP_H_INCLUDED
+#define LWL_HEAP_H_INCLUDED
 
 /*******************************************************************************
 ;
@@ -64,7 +64,7 @@
 /**
  * Invalid index. Stored to nodes that are not in the heap.
  */
-#define LWO__HEAP_INV_IDX 0xFFFFU
+#define LWL__HEAP_INV_IDX 0xFFFFU
 
 /*******************************************************************************
 ;
@@ -151,6 +151,12 @@ bool lwl_heapRemove(
 	const lwl_HeapCmp * pCmp
 );
 
+void lwl__heapMoveUp(
+	const lwl_Heap *	pHeap,
+	lwl_HeapNode *		pNode,
+	const lwl_HeapCmp * pCmp
+);
+
 /** ****************************************************************************
  *
  * \brief		Initialize a heap node.
@@ -164,7 +170,7 @@ bool lwl_heapRemove(
 inline void lwl_heapNodeInit(
 	lwl_HeapNode * pNode
 ) {
-	pNode->heapIdx = LWO__HEAP_INV_IDX;
+	pNode->heapIdx = LWL__HEAP_INV_IDX;
 }
 
 /** ****************************************************************************
@@ -202,7 +208,7 @@ inline void lwl_heapInit(
 inline bool lwl_heapIsNodeInHeap(
 	const lwl_HeapNode * pNode
 ) {
-	return pNode->heapIdx != LWO__HEAP_INV_IDX;
+	return pNode->heapIdx != LWL__HEAP_INV_IDX;
 }
 
 /** ****************************************************************************
@@ -231,7 +237,7 @@ inline bool lwl_heapMoveNode(
 		okToMove = false;
 	}
 
-	if (okToMove == true) {
+	if (okToMove) {
 		lwl__heapMoveInternal(pHeap, pHeapNode, pCmp);
 	}
 
@@ -276,12 +282,36 @@ inline lwl_HeapNode * lwl_heapPopFirst(
 ) {
 	lwl__portAssert(pHeap != NULL);
 
-	lwl_HeapNode * pNode = lwl_heapPeekFirst(pHeap);
-	if (pNode != NULL) {
-		lwl_heapRemove(pHeap, pNode, pCmp);
+	if (pHeap->nodeCount == 0U) {
+		return NULL;
 	}
 
-	return pNode;
+	/*
+	 * First remove the last node from the heap.
+	 */
+	lwl_HeapNode ** pElements = pHeap->pElements;
+	pHeap->nodeCount--;
+	lwl_HeapNode * pLastNode = pElements[pHeap->nodeCount];
+
+	lwl_HeapNode * pRoot = pElements[0];
+	pRoot->heapIdx = LWL__HEAP_INV_IDX;
+
+	if (pRoot != pLastNode) {
+		/*
+		 * The root node was not the last node of the heap.
+		 * Replace the root node with the last node.
+		 */
+		pElements[0] = pLastNode;
+		pLastNode->heapIdx = 0;
+
+		/*
+		 * The node may now be in the wrong place. Move it up until the heap
+		 * property is satisfied.
+		 */
+		lwl__heapMoveUp(pHeap, pLastNode, pCmp);
+	}
+
+	return pRoot;
 }
 
 /** ****************************************************************************
@@ -307,4 +337,4 @@ inline void lwl_heapSetRootNode(
 	pHeap->pElements[0] = pNode;
 }
 
-#endif /* LWO_HEAP_H_INCLUDED */
+#endif /* LWL_HEAP_H_INCLUDED */

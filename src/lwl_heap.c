@@ -78,12 +78,6 @@ static void lwl__heapMoveDown(
 	const lwl_HeapCmp * pCmp
 );
 
-static void lwl__heapMoveUp(
-	const lwl_Heap *	pHeap,
-	lwl_HeapNode *		pNode,
-	const lwl_HeapCmp * pCmp
-);
-
 static void lwl__heapSwapNodes(
 	lwl_HeapNode * pElements[],
 	lwl_HeapNode * pNode1,
@@ -205,42 +199,44 @@ bool lwl_heapRemove(
 	lwl_HeapNode *		pHeapNode,
 	const lwl_HeapCmp * pCmp
 ) {
-	bool isInHeap = lwl_heapIsNodeInHeap(pHeapNode);
+	lwl__portAssert(pHeap != NULL);
 
 	if (pHeap->nodeCount == 0U) {
-		isInHeap = false;
+		return false;
 	}
 
-	if (isInHeap) {
-		lwl_HeapNode ** pElements = pHeap->pElements;
+	bool isInHeap = lwl_heapIsNodeInHeap(pHeapNode);
+	if (!isInHeap) {
+		return false;
+	}
+
+	/*
+	 * First remove the last node from the heap.
+	 */
+	lwl_HeapNode ** pElements = pHeap->pElements;
+	pHeap->nodeCount--;
+	lwl_HeapNode * pLastNode = pElements[pHeap->nodeCount];
+	pElements[pHeap->nodeCount] = NULL;
+
+	uint_fast16_t heapIdx = pHeapNode->heapIdx;
+	pHeapNode->heapIdx = LWL__HEAP_INV_IDX;
+
+	if (pLastNode != pHeapNode) {
+		/*
+		 * The node that should be removed is not the last node of the heap.
+		 * Replace the node that should removed with the last node.
+		 */
+		pElements[heapIdx] = pLastNode;
+		pLastNode->heapIdx = (lwl_HeapIdx)heapIdx;
 
 		/*
-		 * First remove the last node from the heap.
+		 * The node may now be in the wrong place. Move it up or down
+		 * until the heap property is satisfied.
 		 */
-		pHeap->nodeCount--;
-		lwl_HeapNode * pLastNode = pElements[pHeap->nodeCount];
-		pElements[pHeap->nodeCount] = NULL;
-
-		uint_fast16_t heapIdx = pHeapNode->heapIdx;
-		pHeapNode->heapIdx = LWO__HEAP_INV_IDX;
-
-		if (pLastNode != pHeapNode) {
-			/*
-			 * The node that should be removed is not the last node of the heap.
-			 * Replace the node that should removed with the last node.
-			 */
-			pElements[heapIdx] = pLastNode;
-			pLastNode->heapIdx = (lwl_HeapIdx)heapIdx;
-
-			/*
-			 * The node may now be in the wrong place. Move it up or down
-			 * until the heap property is satisfied.
-			 */
-			lwl__heapMoveInternal(pHeap, pLastNode, pCmp);
-		}
+		lwl__heapMoveInternal(pHeap, pLastNode, pCmp);
 	}
 
-	return isInHeap;
+	return true;
 }
 
 /** ****************************************************************************
@@ -296,7 +292,7 @@ static void lwl__heapMoveDown(
  * 				satisfied.
  *
  ******************************************************************************/
-static void lwl__heapMoveUp(
+void lwl__heapMoveUp(
 	const lwl_Heap *	pHeap,
 	lwl_HeapNode *		pNode,
 	const lwl_HeapCmp * pCmp
