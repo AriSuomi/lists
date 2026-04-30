@@ -295,7 +295,7 @@ inline bool lwl_dlListRemove(
 		lwl_DlListNode * pNext = pNode->pNext;
 
 		pPrev->pNext = pNext;
-		pNext->pPrev = pNode->pPrev;
+		pNext->pPrev = pPrev;
 
 		/*
 		 * Set both pointers of the node to NULL to mark that it is not in any
@@ -323,12 +323,53 @@ inline bool lwl_dlListRemove(
 inline lwl_DlListNode * lwl_dlListPopLast(
 	lwl_DlList * pList
 ) {
-	lwl__portAssert(pList != NULL);
+	lwl__sysAssert(pList != NULL);
 
-	lwl_DlListNode * pNode = lwl_dlListPeekLast(pList);
-	if (pNode != NULL) {
-		lwl_dlListRemove(pNode);
+	lwl_DlListNode * pNode = pList->sentinel.pPrev;
+
+	if (pNode == &pList->sentinel) {
+		return NULL;
 	}
+
+	lwl_DlListNode * pPrev = pNode->pPrev;
+	pPrev->pNext = &pList->sentinel;
+	pList->sentinel.pPrev = pPrev;
+
+	pNode->pPrev = NULL;
+	pNode->pNext = NULL;
+
+	return pNode;
+}
+
+/** ****************************************************************************
+ *
+ * 	\brief		Pop the first node.
+ *
+ * 	\param		pList		Pointer to a list.
+ *
+ * 	\return		Pointer to the popped node. NULL if the list was empty.
+ *
+ ******************************************************************************/
+inline lwl_DlListNode * lwl_dlListPopFirst(
+	lwl_DlList * pList
+) {
+	lwl__sysAssert(pList != NULL);
+
+	lwl_DlListNode * pNode = pList->sentinel.pNext;
+
+	// Check if list is empty
+	if (pNode == &pList->sentinel) {
+		return NULL;
+	}
+
+	// Unlink the node
+	lwl_DlListNode * pNext = pNode->pNext;
+	pNext->pPrev = &pList->sentinel;
+	pList->sentinel.pNext = pNext;
+
+	// Mark node as removed
+	pNode->pPrev = NULL;
+	pNode->pNext = NULL;
 
 	return pNode;
 }
@@ -424,28 +465,6 @@ inline lwl_DlListNode * lwl_dlListPeekFirst(
 		pHead = NULL;
 	}
 	return pHead;
-}
-
-/** ****************************************************************************
- *
- * 	\brief		Pop the first node.
- *
- * 	\param		pList		Pointer to a list.
- *
- * 	\return		Pointer to the popped node. NULL if the list was empty.
- *
- ******************************************************************************/
-inline lwl_DlListNode * lwl_dlListPopFirst(
-	lwl_DlList * pList
-) {
-	lwl__portAssert(pList != NULL);
-
-	lwl_DlListNode * pNode = lwl_dlListPeekFirst(pList);
-	if (pNode != NULL) {
-		lwl_dlListRemove(pNode);
-	}
-
-	return pNode;
 }
 
 /** ****************************************************************************
