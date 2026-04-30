@@ -52,6 +52,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #include "lwl/lwl_port.h"
 #include "lwl/lwl_dlList.h"
@@ -67,11 +68,6 @@
  * Invalid list index value. Used for nodes not on the list.
  */
 #define LWL__READYLIST_INVALID_IDX 255U
-
-/**
- * Number of bits in one byte.
- */
-#define LWL__MDLLIST_BITSPERBYTE 8U
 
 /*******************************************************************************
 ;
@@ -129,7 +125,7 @@ inline void lwl_mdlListInit(
 	lwl__portAssert(pMdlList != NULL);
 	lwl__portAssert(pDlLists != NULL);
 
-	if (listCount > 0 && listCount < LWL__READYLIST_INVALID_IDX) {
+	if (listCount > 0 && listCount < sizeof(uint16_t) * CHAR_BIT) {
 		for (uint8_t listIdx = 0; listIdx < listCount; listIdx++) {
 			lwl_dlListInit(&pDlLists[listIdx]);
 		}
@@ -165,7 +161,7 @@ inline bool lwl_mdlListInsert(
 
 	bool wasInserted = false;
 
-	if (listIdx < LWL__READYLIST_INVALID_IDX) {
+	if (listIdx < sizeof(uint16_t) * CHAR_BIT) {
 		pNew->listIdx = listIdx;
 		pMdlList->listMap |= (uint16_t)(1U << listIdx);
 		wasInserted = lwl_dlListPushLast(
