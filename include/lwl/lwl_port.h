@@ -91,7 +91,7 @@
  * 	\return 	Number of leading zeroes.
  *
  ******************************************************************************/
-inline uint8_t lwl__portClz16(
+static inline uint8_t lwl__portClz16(
 	uint16_t num
 ) {
 	if (num == 0U) {
