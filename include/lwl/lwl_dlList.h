@@ -323,7 +323,7 @@ inline bool lwl_dlListRemove(
 inline lwl_DlListNode * lwl_dlListPopLast(
 	lwl_DlList * pList
 ) {
-	lwl__sysAssert(pList != NULL);
+	lwl__portAssert(pList != NULL);
 
 	lwl_DlListNode * pNode = pList->sentinel.pPrev;
 
@@ -353,7 +353,7 @@ inline lwl_DlListNode * lwl_dlListPopLast(
 inline lwl_DlListNode * lwl_dlListPopFirst(
 	lwl_DlList * pList
 ) {
-	lwl__sysAssert(pList != NULL);
+	lwl__portAssert(pList != NULL);
 
 	lwl_DlListNode * pNode = pList->sentinel.pNext;
 
