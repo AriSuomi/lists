@@ -125,7 +125,7 @@ inline void lwl_mdlListInit(
 	lwl__portAssert(pMdlList != NULL);
 	lwl__portAssert(pDlLists != NULL);
 
-	if (listCount > 0 && listCount < sizeof(uint16_t) * CHAR_BIT) {
+	if (listCount > 0 && listCount <= sizeof(uint16_t) * CHAR_BIT) {
 		for (uint8_t listIdx = 0; listIdx < listCount; listIdx++) {
 			lwl_dlListInit(&pDlLists[listIdx]);
 		}
