@@ -261,7 +261,7 @@ inline lwl_HeapNode * lwl_heapPeekFirst(
 ) {
 	lwl__portAssert(pHeap != NULL);
 
-	return pHeap->pElements[0];
+	return (pHeap->nodeCount > 0U) ? pHeap->pElements[0] : NULL;
 }
 
 /** ****************************************************************************
