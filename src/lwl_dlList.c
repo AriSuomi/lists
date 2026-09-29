@@ -185,11 +185,22 @@ bool lwl_dlListMoveNode(
 	bool			 success = lwl_dlListRemove(pNode);
 
 	if (success) {
-		/*
-		 * Check if it should be moved forward or backward in the list. Insert
-		 * the node again by searching for the new spot in the right direction.
-		 */
-		bool toTheBack = pCmp->pCmpFn(pNext, pNode, pCmp->pCmpParam);
+		bool toTheBack = false;
+
+		if (pNext == &pList->sentinel) {
+			/*
+			 * The last node is being moved.
+			 */
+			pNext = pList->sentinel.pPrev;
+
+		} else {
+			/*
+			 * Check if it should be moved forward or backward in the list.
+			 * Insert the node again by searching for the new spot in the right
+			 * direction.
+			 */
+			toTheBack = pCmp->pCmpFn(pNext, pNode, pCmp->pCmpParam);
+		}
 
 		if (toTheBack) {
 			lwl__dlListInsertBack(pList, pNext, pNode, pCmp);
