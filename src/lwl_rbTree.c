@@ -162,18 +162,15 @@ lwl_RbTreeNode lwl__rbTreeNull = {
  * \param[in]	pNewNode	Pointer to node that should be inserted.
  * \param[in]	pCmp		Pointer to node compare information.
  *
- * \retval		true		The node was inserted successfully.
- * \retval		false		Could not insert the node. It may already be in a
- *							tree.
- *
  ******************************************************************************/
-bool lwl_rbInsertNode(
+void lwl_rbInsertNode(
 	lwl_RbTree *		  pTree,
 	lwl_RbTreeNode *	  pNewNode,
 	const lwl_RbTreeCmp * pCmp
 ) {
 	lwl__portAssert(pTree != NULL);
 	lwl__portAssert(pNewNode != NULL);
+	lwl__portAssert(lwl_rbNodeIsInTree(pNewNode) == false);
 	lwl__portAssert(pCmp != NULL);
 
 	lwl_RbTreeNode * pParent = &lwl__rbTreeNull;
@@ -202,8 +199,6 @@ bool lwl_rbInsertNode(
 	}
 
 	lwl__rbTreeInsertFixup(pTree, pNewNode);
-
-	return true;
 }
 
 /** ****************************************************************************
@@ -214,9 +209,6 @@ bool lwl_rbInsertNode(
  * \param[in]	pNode		Pointer to node that should be removed from the
  * 							tree.
  * \param[in]	pCmp		Pointer to node comparing information.
- *
- * \retval		true		The node was successfully removed.
- * \retval		false		Could not remove the node. Maybe it isn't in a tree.
  *
  ******************************************************************************/
 void lwl_rbTreeRemoveNode(
@@ -273,6 +265,8 @@ void lwl_rbTreeRemoveNode(
 	if (originalColor == LWL__RBCOLOR_BLACK) {
 		lwl__rbTreeRemoveFixup(pTree, pFixupNode);
 	}
+
+	pNode->pParent = NULL;
 }
 
 /** ****************************************************************************

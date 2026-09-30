@@ -145,7 +145,7 @@ extern lwl_RbTreeNode lwl__rbTreeNull;
 ;
 ;-----------------------------------------------------------------------------*/
 
-bool lwl_rbInsertNode(
+void lwl_rbInsertNode(
 	lwl_RbTree *		  pTree,
 	lwl_RbTreeNode *	  pNewNode,
 	const lwl_RbTreeCmp * pCmp
@@ -275,7 +275,6 @@ inline lwl_RbTreeNode * lwl_rbTreePeekFirst(
  * \brief		Pop node with highest key.
  *
  * \param[in]	pTree 		Pointer to a tree.
- * \param[in]	pCmp		Pointer to node comparison information.
  *
  * \return		Pointer to the popped node. NULL if the tree was empty.
  *
