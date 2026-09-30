@@ -133,14 +133,6 @@ typedef struct {
 
 /*******************************************************************************
 ;
-;	D A T A
-;
-;-----------------------------------------------------------------------------*/
-
-extern lwl_RbTreeNode lwl__rbTreeNull;
-
-/*******************************************************************************
-;
 ;	F U N C T I O N S
 ;
 ;-----------------------------------------------------------------------------*/
@@ -168,8 +160,7 @@ inline void lwl_rbTreeInit(
 ) {
 	lwl__portAssert(pTree != NULL);
 
-	// Set the root to NIL
-	pTree->root = &lwl__rbTreeNull;
+	pTree->root = NULL;
 }
 
 /** ****************************************************************************
@@ -189,7 +180,8 @@ inline void lwl_rbNodeInit(
 		pNode->children[LWL__RBDIR_LEFT] = NULL;
 		pNode->children[LWL__RBDIR_RIGHT] = NULL;
 		pNode->color = LWL__RBCOLOR_RED;
-		pNode->pParent = NULL;
+		// A node pointing to itself is not in a tree
+		pNode->pParent = pNode;
 	}
 }
 
@@ -211,11 +203,11 @@ inline bool lwl_rbNodeIsInTree(
 	lwl__portAssert(pNode != NULL);
 
 	/*
-	 * Note pointers are set to &lwl__rbTreeNull or some other node when they
-	 * are in the tree.
+	 * The parent pointer points to the node itself when the node is not in a
+	 * tree. The root node has a NULL parent.
 	 */
 	bool isInTree = false;
-	isInTree = pNode->pParent != NULL;
+	isInTree = pNode->pParent != pNode;
 
 	return isInTree;
 }
@@ -236,7 +228,7 @@ inline lwl_RbTreeNode * lwl_rbTreeGetLeftmostChild(
 ) {
 	lwl__portAssert(pNode != NULL);
 
-	while (pNode->children[LWL__RBDIR_LEFT] != &lwl__rbTreeNull) {
+	while (pNode->children[LWL__RBDIR_LEFT] != NULL) {
 		pNode = pNode->children[LWL__RBDIR_LEFT];
 	}
 
@@ -261,10 +253,8 @@ inline lwl_RbTreeNode * lwl_rbTreePeekFirst(
 
 	lwl_RbTreeNode * pNode = pTree->root;
 
-	if (pNode != &lwl__rbTreeNull) {
+	if (pNode != NULL) {
 		pNode = lwl_rbTreeGetLeftmostChild(pNode);
-	} else {
-		pNode = NULL;
 	}
 
 	return pNode;
@@ -315,9 +305,9 @@ inline void lwl_rbTreeSetRootPtr(
 	lwl_RbTreeNode * pNode
 ) {
 	lwl__portAssert(pTree != NULL);
-	lwl__portAssert(pTree->root == &lwl__rbTreeNull);
+	lwl__portAssert(pTree->root == NULL);
 
-	pTree->root = (pNode == NULL) ? &lwl__rbTreeNull : pNode;
+	pTree->root = pNode;
 }
 
 #endif /* LWL_RBTREE_H_INCLUDED */

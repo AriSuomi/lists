@@ -69,6 +69,10 @@
 ;
 ;-----------------------------------------------------------------------------*/
 
+static inline bool lwl__rbNodeIsRed(
+	const lwl_RbTreeNode * pNode
+);
+
 static lwl__RbNodeDir lwl__rbTreeGetNodeDir(
 	const lwl_RbTreeNode * pNode,
 	const lwl_RbTreeNode * pParent
@@ -93,7 +97,8 @@ static void lwl__rbTreeGraftNode(
 
 static void lwl__rbTreeRemoveFixup(
 	lwl_RbTree *	 pTree,
-	lwl_RbTreeNode * pNode
+	lwl_RbTreeNode * pNode,
+	lwl_RbTreeNode * pParent
 );
 
 /*******************************************************************************
@@ -137,17 +142,6 @@ extern inline void lwl_rbTreeSetRootPtr(
 ;
 ;-----------------------------------------------------------------------------*/
 
-/**
- * Sentinel parent node for the root node. This is a dummy node which makes it
- * possible to determine if a node is in a tree or not even when it is the
- * only node in the tree.
- */
-lwl_RbTreeNode lwl__rbTreeNull = {
-	LWL__RBCOLOR_BLACK,
-	&lwl__rbTreeNull,
-	{&lwl__rbTreeNull, &lwl__rbTreeNull}
-};
-
 /*******************************************************************************
 ;
 ;	F U N C T I O N   D E F I N I T I O N S
@@ -173,11 +167,11 @@ void lwl_rbInsertNode(
 	lwl__portAssert(lwl_rbNodeIsInTree(pNewNode) == false);
 	lwl__portAssert(pCmp != NULL);
 
-	lwl_RbTreeNode * pParent = &lwl__rbTreeNull;
+	lwl_RbTreeNode * pParent = NULL;
 	lwl__RbNodeDir	 dir = LWL__RBDIR_LEFT;
 
 	lwl_RbTreeNode * pTreeNode = pTree->root;
-	while (pTreeNode != &lwl__rbTreeNull) {
+	while (pTreeNode != NULL) {
 		pParent = pTreeNode;
 
 		dir = pCmp->pCmpFn(pTreeNode, pNewNode, pCmp->pCmpParam)
@@ -188,11 +182,11 @@ void lwl_rbInsertNode(
 	}
 
 	pNewNode->color = LWL__RBCOLOR_RED;
-	pNewNode->children[LWL__RBDIR_LEFT] = &lwl__rbTreeNull;
-	pNewNode->children[LWL__RBDIR_RIGHT] = &lwl__rbTreeNull;
+	pNewNode->children[LWL__RBDIR_LEFT] = NULL;
+	pNewNode->children[LWL__RBDIR_RIGHT] = NULL;
 	pNewNode->pParent = pParent;
 
-	if (pParent == &lwl__rbTreeNull) {
+	if (pParent == NULL) {
 		pTree->root = pNewNode;
 	} else {
 		pParent->children[dir] = pNewNode;
@@ -219,14 +213,18 @@ void lwl_rbTreeRemoveNode(
 	lwl__portAssert(pNode != NULL);
 	lwl__portAssert(lwl_rbNodeIsInTree(pNode) == true);
 
+	/*
+	 * The fixup node may be NULL, so its parent is tracked separately.
+	 */
 	lwl_RbTreeNode * pFixupNode = NULL;
+	lwl_RbTreeNode * pFixupParent = pNode->pParent;
 	lwl__RbNodeColor originalColor = pNode->color;
 
-	if (pNode->children[LWL__RBDIR_LEFT] == &lwl__rbTreeNull) {
+	if (pNode->children[LWL__RBDIR_LEFT] == NULL) {
 		pFixupNode = pNode->children[LWL__RBDIR_RIGHT];
 		lwl__rbTreeGraftNode(pTree, pNode, pNode->children[LWL__RBDIR_RIGHT]);
 
-	} else if (pNode->children[LWL__RBDIR_RIGHT] == &lwl__rbTreeNull) {
+	} else if (pNode->children[LWL__RBDIR_RIGHT] == NULL) {
 		pFixupNode = pNode->children[LWL__RBDIR_LEFT];
 		lwl__rbTreeGraftNode(pTree, pNode, pNode->children[LWL__RBDIR_LEFT]);
 
@@ -239,10 +237,11 @@ void lwl_rbTreeRemoveNode(
 		pFixupNode = pNextNode->children[LWL__RBDIR_RIGHT];
 
 		if (pNextNode->pParent == pNode) {
-			// Important for when pFixupNode is NIL
-			pFixupNode->pParent = pNextNode;
+			pFixupParent = pNextNode;
 
 		} else {
+			pFixupParent = pNextNode->pParent;
+
 			lwl__rbTreeGraftNode(
 				pTree,
 				pNextNode,
@@ -263,10 +262,27 @@ void lwl_rbTreeRemoveNode(
 	}
 
 	if (originalColor == LWL__RBCOLOR_BLACK) {
-		lwl__rbTreeRemoveFixup(pTree, pFixupNode);
+		lwl__rbTreeRemoveFixup(pTree, pFixupNode, pFixupParent);
 	}
 
-	pNode->pParent = NULL;
+	// Mark the node as not being in a tree
+	pNode->pParent = pNode;
+}
+
+/** ****************************************************************************
+ *
+ * \brief		Check if the supplied node is red.
+ *
+ * \param[in]	pNode		Pointer to the node. May be NULL.
+ *
+ * \retval		true		The node is red.
+ * \retval		false		The node is black or NULL.
+ *
+ ******************************************************************************/
+static inline bool lwl__rbNodeIsRed(
+	const lwl_RbTreeNode * pNode
+) {
+	return (pNode != NULL) && (pNode->color == LWL__RBCOLOR_RED);
 }
 
 /** ****************************************************************************
@@ -292,16 +308,16 @@ static void lwl__rbTreeRotate(
 
 	pNode->children[LWL__RBDIR_RIGHT - direction] = pChild->children[direction];
 
-	if (pChild->children[direction] != &lwl__rbTreeNull) {
+	if (pChild->children[direction] != NULL) {
 		pChild->children[direction]->pParent = pNode;
 	}
 
 	pChild->pParent = pParent;
 
-	if (pParent == &lwl__rbTreeNull) {
+	if (pParent == NULL) {
 		pTree->root = pChild;
 
-	} else if (pNode == pNode->pParent->children[direction]) {
+	} else if (pNode == pParent->children[direction]) {
 		pParent->children[direction] = pChild;
 
 	} else {
@@ -317,7 +333,7 @@ static void lwl__rbTreeRotate(
  * \brief		Check if the supplied node is the left or right child of its
  *				parent
  *
- * \param[in]	pNode		Pointer to the node.
+ * \param[in]	pNode		Pointer to the node. May be NULL.
  * \param[in]	pParent		Pointer to the parent node.
  *
  * \retval		LWL__RBDIR_RIGHT	The node is the right child of its parent.
@@ -330,7 +346,7 @@ static lwl__RbNodeDir lwl__rbTreeGetNodeDir(
 	const lwl_RbTreeNode * pNode,
 	const lwl_RbTreeNode * pParent
 ) {
-	lwl__portAssert(pParent != &lwl__rbTreeNull);
+	lwl__portAssert(pParent != NULL);
 
 	return (pParent->children[LWL__RBDIR_RIGHT] == pNode)
 		? LWL__RBDIR_RIGHT
@@ -355,7 +371,11 @@ static void lwl__rbTreeInsertFixup(
 ) {
 	lwl_RbTreeNode * pParent = pNode->pParent;
 
-	while (pParent->color == LWL__RBCOLOR_RED) {
+	/*
+	 * A red parent is never the root node, so the grandparent always exists
+	 * inside the loop.
+	 */
+	while (lwl__rbNodeIsRed(pParent)) {
 		lwl__RbNodeDir parentDir = lwl__rbTreeGetNodeDir(
 			pParent,
 			pParent->pParent
@@ -364,7 +384,7 @@ static void lwl__rbTreeInsertFixup(
 		lwl_RbTreeNode * pUncle =
 			pParent->pParent->children[LWL__RBDIR_RIGHT - parentDir];
 
-		if (pUncle->color == LWL__RBCOLOR_RED) {
+		if (lwl__rbNodeIsRed(pUncle)) {
 			/*
 			 * Both the uncle and the parent are red. They can both be
 			 * made black if we make the grandparent red.
@@ -423,7 +443,7 @@ static void lwl__rbTreeGraftNode(
 ) {
 	lwl_RbTreeNode * pRootstock = pOldBranch->pParent;
 
-	if (pRootstock == &lwl__rbTreeNull) {
+	if (pRootstock == NULL) {
 		pTree->root = pScion;
 
 	} else {
@@ -431,7 +451,9 @@ static void lwl__rbTreeGraftNode(
 		pRootstock->children[nodeDir] = pScion;
 	}
 
-	pScion->pParent = pRootstock;
+	if (pScion != NULL) {
+		pScion->pParent = pRootstock;
+	}
 }
 
 /** ****************************************************************************
@@ -439,61 +461,66 @@ static void lwl__rbTreeGraftNode(
  * \brief		Perform fixup after node removal.
  *
  * \param[in]	pTree		Pointer to the tree.
- * \param[in]	pNode		The node to start the fixup from.
+ * \param[in]	pNode		The node to start the fixup from. May be NULL.
+ * \param[in]	pParent		Pointer to the parent of pNode. NULL if pNode is
+ * 							the root node.
  *
- * \details
- *
- * \note
+ * \details		The parent is passed separately since pNode may be NULL, in
+ * 				which case its parent cannot be read from the node.
  *
  ******************************************************************************/
 static void lwl__rbTreeRemoveFixup(
 	lwl_RbTree *	 pTree,
-	lwl_RbTreeNode * pNode
+	lwl_RbTreeNode * pNode,
+	lwl_RbTreeNode * pParent
 ) {
-	while ((pNode != pTree->root) && (pNode->color == LWL__RBCOLOR_BLACK)) {
-		lwl__RbNodeDir nodeDir = lwl__rbTreeGetNodeDir(pNode, pNode->pParent);
+	while ((pNode != pTree->root) && !lwl__rbNodeIsRed(pNode)) {
+		lwl__RbNodeDir nodeDir = lwl__rbTreeGetNodeDir(pNode, pParent);
 
 		lwl_RbTreeNode * pSibling =
-			pNode->pParent->children[LWL__RBDIR_RIGHT - nodeDir];
+			pParent->children[LWL__RBDIR_RIGHT - nodeDir];
 
-		if (pSibling->color == LWL__RBCOLOR_RED) {
+		if (lwl__rbNodeIsRed(pSibling)) {
 			// Case 1: Sibling is LWL__RBCOLOR_RED
 			pSibling->color = LWL__RBCOLOR_BLACK;
-			pNode->pParent->color = LWL__RBCOLOR_RED;
-			lwl__rbTreeRotate(pTree, pNode->pParent, nodeDir);
-			pSibling = pNode->pParent->children[LWL__RBDIR_RIGHT - nodeDir];
+			pParent->color = LWL__RBCOLOR_RED;
+			lwl__rbTreeRotate(pTree, pParent, nodeDir);
+			pSibling = pParent->children[LWL__RBDIR_RIGHT - nodeDir];
 		}
 
 		if (
-			(pSibling->children[nodeDir]->color == LWL__RBCOLOR_BLACK) &&
-			(pSibling->children[LWL__RBDIR_RIGHT - nodeDir]->color ==
-			 LWL__RBCOLOR_BLACK)
+			!lwl__rbNodeIsRed(pSibling->children[nodeDir]) &&
+			!lwl__rbNodeIsRed(pSibling->children[LWL__RBDIR_RIGHT - nodeDir])
 		) {
 			// Case 2
 			pSibling->color = LWL__RBCOLOR_RED;
-			pNode = pNode->pParent;
+			pNode = pParent;
+			pParent = pNode->pParent;
 
 		} else {
 			if (
-				pSibling->children[LWL__RBDIR_RIGHT - nodeDir]->color ==
-				LWL__RBCOLOR_BLACK
+				!lwl__rbNodeIsRed(
+					pSibling->children[LWL__RBDIR_RIGHT - nodeDir]
+				)
 			) {
 				// Case 3: Triangle
 				pSibling->children[nodeDir]->color = LWL__RBCOLOR_BLACK;
 				pSibling->color = LWL__RBCOLOR_RED;
 				lwl__rbTreeRotate(pTree, pSibling, LWL__RBDIR_RIGHT - nodeDir);
-				pSibling = pNode->pParent->children[LWL__RBDIR_RIGHT - nodeDir];
+				pSibling = pParent->children[LWL__RBDIR_RIGHT - nodeDir];
 			}
 
 			// Case 4: Line
-			pSibling->color = pNode->pParent->color;
-			pNode->pParent->color = LWL__RBCOLOR_BLACK;
+			pSibling->color = pParent->color;
+			pParent->color = LWL__RBCOLOR_BLACK;
 			pSibling->children[LWL__RBDIR_RIGHT - nodeDir]->color =
 				LWL__RBCOLOR_BLACK;
-			lwl__rbTreeRotate(pTree, pNode->pParent, nodeDir);
+			lwl__rbTreeRotate(pTree, pParent, nodeDir);
 			pNode = pTree->root;
 		}
 	}
 
-	pNode->color = LWL__RBCOLOR_BLACK;
+	if (pNode != NULL) {
+		pNode->color = LWL__RBCOLOR_BLACK;
+	}
 }
