@@ -339,10 +339,16 @@ static void lwl__rbTreeRotate(
 	lwl_RbTreeNode * pChild = pNode->children[LWL__RBDIR_RIGHT - direction];
 	lwl_RbTreeNode * pParent = pNode->pParent;
 
-	pNode->children[LWL__RBDIR_RIGHT - direction] = pChild->children[direction];
+	/*
+	 * The inner child of pChild moves over to pNode. Read once, since the
+	 * compiler must otherwise reload it after the store to pNode->children.
+	 */
+	lwl_RbTreeNode * pInnerChild = pChild->children[direction];
 
-	if (pChild->children[direction] != NULL) {
-		pChild->children[direction]->pParent = pNode;
+	pNode->children[LWL__RBDIR_RIGHT - direction] = pInnerChild;
+
+	if (pInnerChild != NULL) {
+		pInnerChild->pParent = pNode;
 	}
 
 	pChild->pParent = pParent;
