@@ -454,7 +454,12 @@ static void lwl__rbTreeInsertFixup(
 				LWL__RBDIR_RIGHT - parentDir
 			);
 
-			pParent = pNode->pParent;
+			/*
+			 * The subtree now has a black root, so the tree is valid. The
+			 * tree root is also black: either it is the old parent or it
+			 * was not changed.
+			 */
+			return;
 		}
 	}
 
