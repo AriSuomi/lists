@@ -218,7 +218,6 @@ void lwl_rbInsertNode(
  * \param[in]	pTree		Pointer to the tree.
  * \param[in]	pNode		Pointer to node that should be removed from the
  * 							tree.
- * \param[in]	pCmp		Pointer to node comparing information.
  *
  ******************************************************************************/
 void lwl_rbTreeRemoveNode(

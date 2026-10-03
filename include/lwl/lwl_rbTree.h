@@ -220,7 +220,7 @@ inline bool lwl_rbNodeIsInTree(
  *
  * \param[in]	pNode		Parent node.
  *
- * \return		Pointer to the parent node.
+ * \return		Pointer to the leftmost child node.
  *
  * \details
  *
@@ -258,7 +258,7 @@ inline lwl_RbTreeNode * lwl_rbTreePeekFirst(
 
 /** ****************************************************************************
  *
- * \brief		Pop node with highest key.
+ * \brief		Pop the first (leftmost) node.
  *
  * \param[in]	pTree 		Pointer to a tree.
  *
