@@ -517,7 +517,8 @@ static void lwl__rbTreeRemoveFixup(
 	lwl_RbTreeNode * pNode,
 	lwl_RbTreeNode * pParent
 ) {
-	while ((pNode != pTree->root) && !lwl__rbNodeIsRed(pNode)) {
+	// pNode is the root when it has no parent
+	while ((pParent != NULL) && !lwl__rbNodeIsRed(pNode)) {
 		lwl__RbNodeDir nodeDir = lwl__rbTreeGetNodeDir(pNode, pParent);
 
 		lwl_RbTreeNode * pSibling =
