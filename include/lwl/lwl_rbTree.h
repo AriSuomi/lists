@@ -178,13 +178,13 @@ inline void lwl_rbNodeInit(
 	lwl_RbTreeNode * pNode
 ) {
 	lwl__portAssert(pNode != NULL);
-	if (pNode != NULL) {
-		pNode->children[LWL__RBDIR_LEFT] = NULL;
-		pNode->children[LWL__RBDIR_RIGHT] = NULL;
-		pNode->color = LWL__RBCOLOR_RED;
-		// A node pointing to itself is not in a tree
-		pNode->pParent = pNode;
-	}
+
+	pNode->children[LWL__RBDIR_LEFT] = NULL;
+	pNode->children[LWL__RBDIR_RIGHT] = NULL;
+	pNode->color = LWL__RBCOLOR_RED;
+
+	// A node pointing to itself is not in a tree
+	pNode->pParent = pNode;
 }
 
 /** ****************************************************************************
