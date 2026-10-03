@@ -50,6 +50,9 @@
 ;-----------------------------------------------------------------------------*/
 
 #include <stdint.h>
+#include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 /*******************************************************************************
 ;
@@ -62,7 +65,7 @@
  *
  * \param	expr_		The asserted boolean expression.
  */
-#define lwl__portAssert(expr_)
+#define lwl__portAssert(expr_) assert(expr_)
 
 /*******************************************************************************
 ;
@@ -81,12 +84,22 @@
 ;	F U N C T I O N S
 ;
 ;-----------------------------------------------------------------------------*/
-
+#ifdef __GNUC__
+# define lwl__portClz16(num_) ((uint8_t)(__builtin_clz(num_) - 16U))
+#elif defined(_MSC_VER)
+#include <intrin.h>
+static __forceinline uint8_t lwl__portClz16(unsigned short num_)
+{
+    unsigned long idx_;
+    _BitScanReverse(&idx_, num_);
+    return (uint8_t)(15U - idx_);
+}
+#else
 /** ****************************************************************************
  *
  * 	\brief		Count leading zeroes from 16-bit value.
  *
- * 	\param		value		The value to count leading zeroes in.
+ * 	\param		num		The value to count leading zeroes in.
  *
  * 	\return 	Number of leading zeroes.
  *
@@ -121,5 +134,6 @@ static inline uint8_t lwl__portClz16(
 
 	return count;
 }
+#endif
 
 #endif  // LWL_PORT_H_INCLUDED
