@@ -170,11 +170,18 @@ void lwl_rbInsertNode(
 	lwl_RbTreeNode * pParent = NULL;
 	lwl__RbNodeDir	 dir = LWL__RBDIR_LEFT;
 
+	/*
+	 * Copied to locals since the compiler must otherwise reload them after
+	 * every call, as the compare function could modify *pCmp.
+	 */
+	lwl_RbTreeCmpFn * pCmpFn = pCmp->pCmpFn;
+	const void *	  pCmpParam = pCmp->pCmpParam;
+
 	lwl_RbTreeNode * pTreeNode = pTree->root;
 	while (pTreeNode != NULL) {
 		pParent = pTreeNode;
 
-		dir = pCmp->pCmpFn(pTreeNode, pNewNode, pCmp->pCmpParam)
+		dir = pCmpFn(pTreeNode, pNewNode, pCmpParam)
 			? LWL__RBDIR_RIGHT
 			: LWL__RBDIR_LEFT;
 
