@@ -192,6 +192,15 @@ void lwl_rbInsertNode(
 		pParent->children[dir] = pNewNode;
 	}
 
+	/*
+	 * The new node is the first node only if it was added as the left child of
+	 * the previous first node. This also covers an empty tree, where both the
+	 * parent and the previous first node are NULL.
+	 */
+	if ((pParent == pTree->pLeftmost) && (dir == LWL__RBDIR_LEFT)) {
+		pTree->pLeftmost = pNewNode;
+	}
+
 	lwl__rbTreeInsertFixup(pTree, pNewNode);
 }
 
@@ -219,6 +228,23 @@ void lwl_rbTreeRemoveNode(
 	lwl_RbTreeNode * pFixupNode = NULL;
 	lwl_RbTreeNode * pFixupParent = pNode->pParent;
 	lwl__RbNodeColor originalColor = pNode->color;
+
+	if (pNode == pTree->pLeftmost) {
+		/*
+		 * The first node has no left child, so the next node is its right
+		 * child if it has one. In a red black tree that right child is a red
+		 * leaf. Otherwise the next node is the parent.
+		 */
+		lwl_RbTreeNode * pNextNode = pNode->children[LWL__RBDIR_RIGHT];
+
+		lwl__portAssert(pNode->children[LWL__RBDIR_LEFT] == NULL);
+		lwl__portAssert(
+			(pNextNode == NULL) ||
+			(pNextNode->children[LWL__RBDIR_LEFT] == NULL)
+		);
+
+		pTree->pLeftmost = (pNextNode != NULL) ? pNextNode : pFixupParent;
+	}
 
 	if (pNode->children[LWL__RBDIR_LEFT] == NULL) {
 		pFixupNode = pNode->children[LWL__RBDIR_RIGHT];

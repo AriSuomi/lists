@@ -99,7 +99,8 @@ struct lwl__rbTreeNode {
  * The Red-Black Tree.
  */
 typedef struct {
-	lwl_RbTreeNode * root;	   // Pointer to the root of the tree
+	lwl_RbTreeNode * root;	    // Pointer to the root of the tree
+	lwl_RbTreeNode * pLeftmost; // Pointer to the first node of the tree
 } lwl_RbTree;
 
 /** ****************************************************************************
@@ -161,6 +162,7 @@ inline void lwl_rbTreeInit(
 	lwl__portAssert(pTree != NULL);
 
 	pTree->root = NULL;
+	pTree->pLeftmost = NULL;
 }
 
 /** ****************************************************************************
@@ -251,13 +253,7 @@ inline lwl_RbTreeNode * lwl_rbTreePeekFirst(
 ) {
 	lwl__portAssert(pTree != NULL);
 
-	lwl_RbTreeNode * pNode = pTree->root;
-
-	if (pNode != NULL) {
-		pNode = lwl_rbTreeGetLeftmostChild(pNode);
-	}
-
-	return pNode;
+	return pTree->pLeftmost;
 }
 
 /** ****************************************************************************
