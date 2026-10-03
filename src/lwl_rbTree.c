@@ -559,7 +559,13 @@ static void lwl__rbTreeRemoveFixup(
 			pSibling->children[LWL__RBDIR_RIGHT - nodeDir]->color =
 				LWL__RBCOLOR_BLACK;
 			lwl__rbTreeRotate(pTree, pParent, nodeDir);
-			pNode = pTree->root;
+
+			/*
+			 * The missing black is restored, so the tree is valid. The tree
+			 * root is also black: either it is the sibling, which took the
+			 * color of the old black root, or it was not changed.
+			 */
+			return;
 		}
 	}
 
