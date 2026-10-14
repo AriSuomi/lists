@@ -157,7 +157,7 @@ extern inline void lwl_rbTreeSetRootPtr(
  * \param[in]	pCmp		Pointer to node compare information.
  *
  ******************************************************************************/
-void lwl_rbInsertNode(
+void lwl_rbTreeInsertNode(
 	lwl_RbTree *		  pTree,
 	lwl_RbTreeNode *	  pNewNode,
 	const lwl_RbTreeCmp * pCmp

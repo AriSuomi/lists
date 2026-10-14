@@ -138,7 +138,7 @@ typedef struct {
 ;
 ;-----------------------------------------------------------------------------*/
 
-void lwl_rbInsertNode(
+void lwl_rbTreeInsertNode(
 	lwl_RbTree *		  pTree,
 	lwl_RbTreeNode *	  pNewNode,
 	const lwl_RbTreeCmp * pCmp
