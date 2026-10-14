@@ -519,6 +519,11 @@ static void lwl__rbTreeRemoveFixup(
 ) {
 	// pNode is the root when it has no parent
 	while ((pParent != NULL) && !lwl__rbNodeIsRed(pNode)) {
+		/*
+		 * This also works when pNode is NULL. The NULL branch is missing one
+		 * black, so the sibling branch has at least one black node and cannot
+		 * be NULL. Only the branch of pNode can then be equal to NULL.
+		 */
 		lwl__RbNodeDir nodeDir = lwl__rbTreeGetNodeDir(pNode, pParent);
 
 		lwl_RbTreeNode * pSibling =
