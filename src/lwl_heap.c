@@ -257,6 +257,12 @@ static void lwl__heapMoveDown(
 	const lwl_HeapCmp * pCmp
 ) {
 	uint_fast16_t	index = pNode->heapIdx;
+	/*
+	 * Copied to locals since the compiler must otherwise reload them after
+	 * every call, as the compare function could modify *pCmp and *pHeap.
+	 */
+	lwl_HeapCmpFn * pCmpFn = pCmp->pCmpFn;
+	const void *	pCmpParam = pCmp->pCmpParam;
 	lwl_HeapNode ** pElements = pHeap->pElements;
 
 	while (index != 0U) {
@@ -266,8 +272,8 @@ static void lwl__heapMoveDown(
 		/*
 		 * Compare nodes to see if we need to swap them.
 		 */
-		bool doSwap = pCmp->pCmpFn(pNode, pParent, pCmp->pCmpParam);
-		if (!doSwap) {
+		bool moveTowardsRoot = pCmpFn(pNode, pParent, pCmpParam);
+		if (!moveTowardsRoot) {
 			break;
 		}
 
