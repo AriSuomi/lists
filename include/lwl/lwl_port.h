@@ -67,6 +67,32 @@
  */
 #define lwl__portAssert(expr_) assert(expr_)
 
+/**
+ * Minimum alignment of list nodes in bytes. The lowest bits of node pointers
+ * that are always zero because of this alignment may be used to store flags,
+ * like the color of red black tree nodes.
+ *
+ * Defaults to the pointer size on architectures that are known to align
+ * pointers to their size, and to 1 (no free bits) on other targets, like 8-bit
+ * AVR. A too small value is always safe, a too large one is not. RISC-V uses 4
+ * for both the 32-bit and the 64-bit variants.
+ *
+ * Define before including the library headers to override. Define as 1 when
+ * nodes are placed in packed structures.
+ */
+#ifndef LWL_PORT_NODE_ALIGNMENT
+# if defined(__x86_64__) || defined(_M_X64) || \
+	 defined(__aarch64__) || defined(_M_ARM64)
+#  define LWL_PORT_NODE_ALIGNMENT 8
+# elif defined(__i386__) || defined(_M_IX86) || \
+	 defined(__arm__) || defined(_M_ARM) || \
+	 defined(__riscv)
+#  define LWL_PORT_NODE_ALIGNMENT 4
+# else
+#  define LWL_PORT_NODE_ALIGNMENT 1
+# endif
+#endif
+
 /*******************************************************************************
 ;
 ;	T Y P E S
