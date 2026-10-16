@@ -151,7 +151,7 @@ bool lwl_heapRemove(
 	const lwl_HeapCmp * pCmp
 );
 
-void lwl__heapMoveUp(
+void lwl__heapMoveTowardsLeafs(
 	const lwl_Heap *	pHeap,
 	lwl_HeapNode *		pNode,
 	const lwl_HeapCmp * pCmp
@@ -305,10 +305,10 @@ inline lwl_HeapNode * lwl_heapPopFirst(
 		pLastNode->heapIdx = 0;
 
 		/*
-		 * The node may now be in the wrong place. Move it up until the heap
-		 * property is satisfied.
+		 * The node may now be in the wrong place. Move it towards the leafs
+		 * until the heap property is satisfied.
 		 */
-		lwl__heapMoveUp(pHeap, pLastNode, pCmp);
+		lwl__heapMoveTowardsLeafs(pHeap, pLastNode, pCmp);
 	}
 
 	return pRoot;
