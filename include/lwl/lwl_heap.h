@@ -298,15 +298,14 @@ inline lwl_HeapNode * lwl_heapPopFirst(
 
 	if (pRoot != pLastNode) {
 		/*
-		 * The root node was not the last node of the heap.
-		 * Replace the root node with the last node.
+		 * The root node was not the last node of the heap. The root is the
+		 * starting position of the last node.
 		 */
-		pElements[0] = pLastNode;
 		pLastNode->heapIdx = 0;
 
 		/*
-		 * The node may now be in the wrong place. Move it up until the heap
-		 * property is satisfied.
+		 * The node may be in the wrong place. Move it up until the heap
+		 * property is satisfied. This also stores the node to the heap array.
 		 */
 		lwl__heapMoveUp(pHeap, pLastNode, pCmp);
 	}
