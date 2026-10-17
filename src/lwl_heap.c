@@ -75,7 +75,7 @@
 static void lwl__heapMoveTowardsRoot(
 	const lwl_Heap *	pHeap,
 	lwl_HeapNode *		pNode,
-	uint_fast16_t		index,
+	uint_fast16_t		nodeIdx,
 	const lwl_HeapCmp * pCmp
 );
 
@@ -227,7 +227,7 @@ bool lwl_heapRemove(
  *
  * \param[in]	pHeap		Pointer to the heap containing the node.
  * \param[in]	pNode		Pointer to the node that should be moved.
- * \param[in]	nodeIdx		The index of the node being moved.
+ * \param[in]	nodeIdx		Starting index for the move operation.
  * \param[in]	pCmp		Pointer to the node comparing information.
  *
  * \details		Move a node towards the root node until the heap property is
@@ -275,7 +275,7 @@ static void lwl__heapMoveTowardsRoot(
  *
  * \param[in]	pHeap		Pointer to the heap containing the node.
  * \param[in]	pNode		Pointer to the node that should be moved.
- * \param[in]	nodeIdx		The index of the node being moved.
+ * \param[in]	nodeIdx		Starting index for the move operation.
  * \param[in]	pCmp		Pointer to the node comparing information.
  *
  * \details		Move a node away from the root node until the heap property is
@@ -333,7 +333,7 @@ void lwl__heapMoveTowardsLeafs(
 		pFirst->heapIdx = nodeIdx;
 
 		/*
-		 * Get index of the left child node.
+		 * Move to the child and continue searching for a valid position.
 		 */
 		nodeIdx = childIdx;
 	}
@@ -348,6 +348,7 @@ void lwl__heapMoveTowardsLeafs(
  *
  * \param[in]	pHeap		Pointer to the heap containing the node.
  * \param[in]	pNode		Pointer to the node that should be moved.
+ * \param[in]	nodeIdx		Starting index for the move operation.
  * \param[in]	pCmp		Pointer to the node comparing information.
  *
  * \details		This function is used internally in the heap. It should not
