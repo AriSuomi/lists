@@ -75,13 +75,8 @@
 static void lwl__heapMoveTowardsRoot(
 	const lwl_Heap *	pHeap,
 	lwl_HeapNode *		pNode,
+	uint_fast16_t		index,
 	const lwl_HeapCmp * pCmp
-);
-
-static void lwl__heapSwapNodes(
-	lwl_HeapNode * pElements[],
-	lwl_HeapNode * pNode1,
-	lwl_HeapNode * pNode2
 );
 
 /*******************************************************************************
@@ -163,18 +158,12 @@ bool lwl_heapInsert(
 
 	if (okToInsert) {
 		uint_fast16_t nodeIdx = pHeap->nodeCount;
-
-		/*
-		 * Insert the node to the next free spot in the heap.
-		 */
-		pHeap->pElements[nodeIdx] = pNew;
-		pNew->heapIdx = (lwl_HeapIdx)nodeIdx;
 		pHeap->nodeCount = (lwl_HeapIdx)(nodeIdx + 1U);
 
 		/*
 		 * Move node towards the root until the heap property is satisfied.
 		 */
-		lwl__heapMoveTowardsRoot(pHeap, pNew, pCmp);
+		lwl__heapMoveTowardsRoot(pHeap, pNew, nodeIdx, pCmp);
 	}
 
 	return okToInsert;
@@ -223,17 +212,10 @@ bool lwl_heapRemove(
 
 	if (pLastNode != pHeapNode) {
 		/*
-		 * The node that should be removed is not the last node of the heap.
-		 * Replace the node that should removed with the last node.
+		 * The node may now be in the wrong place. Move it towards the leafs or
+		 * root until the heap property is satisfied.
 		 */
-		pElements[heapIdx] = pLastNode;
-		pLastNode->heapIdx = (lwl_HeapIdx)heapIdx;
-
-		/*
-		 * The node may now be in the wrong place. Move it up or down
-		 * until the heap property is satisfied.
-		 */
-		lwl__heapMoveInternal(pHeap, pLastNode, pCmp);
+		lwl__heapMoveInternal(pHeap, pLastNode, heapIdx, pCmp);
 	}
 
 	return true;
@@ -245,6 +227,7 @@ bool lwl_heapRemove(
  *
  * \param[in]	pHeap		Pointer to the heap containing the node.
  * \param[in]	pNode		Pointer to the node that should be moved.
+ * \param[in]	nodeIdx		The index of the node being moved.
  * \param[in]	pCmp		Pointer to the node comparing information.
  *
  * \details		Move a node towards the root node until the heap property is
@@ -254,23 +237,19 @@ bool lwl_heapRemove(
 static void lwl__heapMoveTowardsRoot(
 	const lwl_Heap *	pHeap,
 	lwl_HeapNode *		pNode,
+	uint_fast16_t		nodeIdx,
 	const lwl_HeapCmp * pCmp
 ) {
-	uint_fast16_t	index = pNode->heapIdx;
-	/*
-	 * Copied to locals since the compiler must otherwise reload them after
-	 * every call, as the compare function could modify *pCmp and *pHeap.
-	 */
 	lwl_HeapCmpFn * pCmpFn = pCmp->pCmpFn;
 	const void *	pCmpParam = pCmp->pCmpParam;
 	lwl_HeapNode ** pElements = pHeap->pElements;
 
-	while (index != 0U) {
-		uint_fast16_t  parentIndex = (index - 1U) >> 1U;
+	while (nodeIdx != 0U) {
+		uint_fast16_t  parentIndex = (nodeIdx - 1U) >> 1U;
 		lwl_HeapNode * pParent = pElements[parentIndex];
 
 		/*
-		 * Compare nodes to see if we need to swap them.
+		 * Compare nodes to see if we need to move further.
 		 */
 		bool moveTowardsRoot = pCmpFn(pNode, pParent, pCmpParam);
 		if (!moveTowardsRoot) {
@@ -278,12 +257,16 @@ static void lwl__heapMoveTowardsRoot(
 		}
 
 		/*
-		 * Swap nodes and continue down.
+		 * Move parent and continue down.
 		 */
-		lwl__heapSwapNodes(pElements, pParent, pNode);
+		pElements[nodeIdx] = pParent;
+		pParent->heapIdx = nodeIdx;
 
-		index = parentIndex;
+		nodeIdx = parentIndex;
 	}
+
+	pElements[nodeIdx] = pNode;
+	pNode->heapIdx = nodeIdx;
 }
 
 /** ****************************************************************************
@@ -292,6 +275,7 @@ static void lwl__heapMoveTowardsRoot(
  *
  * \param[in]	pHeap		Pointer to the heap containing the node.
  * \param[in]	pNode		Pointer to the node that should be moved.
+ * \param[in]	nodeIdx		The index of the node being moved.
  * \param[in]	pCmp		Pointer to the node comparing information.
  *
  * \details		Move a node away from the root node until the heap property is
@@ -301,59 +285,61 @@ static void lwl__heapMoveTowardsRoot(
 void lwl__heapMoveTowardsLeafs(
 	const lwl_Heap *	pHeap,
 	lwl_HeapNode *		pNode,
+	uint_fast16_t		nodeIdx,
 	const lwl_HeapCmp * pCmp
 ) {
-	uint_fast16_t leftIdx = 1U;
-	if (pNode->heapIdx != 0U) {
-		/*
-		 * Get index of the left child node.
-		 */
-		leftIdx = (uint_fast16_t)(pNode->heapIdx << 1U) + 1U;
-	}
-
-	/*
-	 * Swap the position of the node and one of its child nodes until the
-	 * position is valid for a heap.
-	 */
+	uint_fast16_t nodeCount = pHeap->nodeCount;
+	lwl_HeapCmpFn * pCmpFn = pCmp->pCmpFn;
+	const void *	pCmpParam = pCmp->pCmpParam;
 	lwl_HeapNode ** pElements = pHeap->pElements;
 
-	while (leftIdx < pHeap->nodeCount) {
-		/*
-		 * The node has a left child. Check if the left child
-		 * should be before the node.
-		 */
-		lwl_HeapNode * pFirst = pNode;
-		lwl_HeapNode * pLeft = pElements[leftIdx];
-		if (pCmp->pCmpFn(pLeft, pNode, pCmp->pCmpParam)) {
-			pFirst = pLeft;
+	/*
+	 * Search for a suitable position for the node by moving it towards the
+	 * leafs.
+	 */
+
+	for (;;) {
+		uint_fast16_t childIdx = (nodeIdx << 1U) + 1U;
+		if (childIdx >= nodeCount) {
+			break;
 		}
 
-		uint_fast16_t rightIdx = leftIdx + 1U;
-		if (rightIdx < pHeap->nodeCount) {
+		lwl_HeapNode * pFirst = pElements[childIdx];
+
+		uint_fast16_t rightIdx = childIdx + 1U;
+		if (rightIdx < nodeCount) {
+			/*
+			 * There is a left and right child. Check which one should be first
+			 * in the heap.
+			 */
 			lwl_HeapNode * pRight = pElements[rightIdx];
-			if (pCmp->pCmpFn(pRight, pFirst, pCmp->pCmpParam)) {
+			if (pCmpFn(pRight, pFirst, pCmpParam)) {
 				/*
-				 * The node has a right child that should be before the
-				 * node and its left child.
+				 * The right child should be before the left child.
 				 */
 				pFirst = pRight;
+				childIdx = rightIdx;
 			}
 		}
 
-		if (pFirst == pNode) {
+		if (!pCmpFn(pFirst, pNode, pCmpParam)) {
 			/*
 			 * A valid position has been found for the node.
 			 */
 			break;
 		}
 
-		lwl__heapSwapNodes(pElements, pNode, pFirst);
+		pElements[nodeIdx] = pFirst;
+		pFirst->heapIdx = nodeIdx;
 
 		/*
 		 * Get index of the left child node.
 		 */
-		leftIdx = ((uint_fast16_t)(pNode->heapIdx << 1U)) + 1U;
+		nodeIdx = childIdx;
 	}
+
+	pElements[nodeIdx] = pNode;
+	pNode->heapIdx = nodeIdx;
 }
 
 /** ****************************************************************************
@@ -371,48 +357,26 @@ void lwl__heapMoveTowardsLeafs(
 void lwl__heapMoveInternal(
 	const lwl_Heap *	pHeap,
 	lwl_HeapNode *		pNode,
+	uint_fast16_t		nodeIdx,
 	const lwl_HeapCmp * pCmp
 ) {
 	/*
 	 * Check if it should be moved up or down.
 	 */
-	uint_fast16_t nodeIdx = pNode->heapIdx;
 	if (nodeIdx == 0U) {
 		/*
 		 * It is the root node.
 		 */
-		lwl__heapMoveTowardsLeafs(pHeap, pNode, pCmp);
+		lwl__heapMoveTowardsLeafs(pHeap, pNode, nodeIdx, pCmp);
 
 	} else {
 		uint_fast16_t  parentIdx = (nodeIdx - 1U) >> 1U;
 		lwl_HeapNode * pParent = pHeap->pElements[parentIdx];
 
 		if (pCmp->pCmpFn(pParent, pNode, pCmp->pCmpParam)) {
-			lwl__heapMoveTowardsLeafs(pHeap, pNode, pCmp);
+			lwl__heapMoveTowardsLeafs(pHeap, pNode, nodeIdx, pCmp);
 		} else {
-			lwl__heapMoveTowardsRoot(pHeap, pNode, pCmp);
+			lwl__heapMoveTowardsRoot(pHeap, pNode, nodeIdx, pCmp);
 		}
 	}
-}
-
-/** ****************************************************************************
- *
- * \brief		Swap the location of two nodes in the heap.
- *
- * \param[in]	pElements	Pointer to array of heap elements.
- * \param[in]	pNode1		Pointer to node 1.
- * \param[in]	pNode2		Pointer to node 2.
- *
- ******************************************************************************/
-static void lwl__heapSwapNodes(
-	lwl_HeapNode * pElements[],
-	lwl_HeapNode * pNode1,
-	lwl_HeapNode * pNode2
-) {
-	lwl_HeapIdx node1Idx = pNode1->heapIdx;
-	lwl_HeapIdx node2Idx = pNode2->heapIdx;
-	pElements[node1Idx] = pNode2;
-	pNode2->heapIdx = node1Idx;
-	pElements[node2Idx] = pNode1;
-	pNode1->heapIdx = node2Idx;
 }
