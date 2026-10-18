@@ -52,6 +52,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <limits.h>
 
 /*******************************************************************************
 ;
@@ -110,7 +111,26 @@
 ;
 ;-----------------------------------------------------------------------------*/
 #ifdef __GNUC__
-#	define lwl__portClz16(num_) ((uint8_t)(__builtin_clz(num_) - 16U))
+/** ****************************************************************************
+ *
+ * 	\brief		Count leading zeroes from 16-bit value.
+ *
+ * 	\param		num		The value to count leading zeroes in. Must not be 0.
+ *
+ * 	\return 	Number of leading zeroes.
+ *
+ * 	\details	__builtin_clz counts the zeroes in an unsigned int, which is
+ * 				16 bits on targets like AVR and MSP430 and 32 bits on most
+ * 				others, so the extra bits of an unsigned int are subtracted.
+ *
+ ******************************************************************************/
+static inline uint8_t lwl__portClz16(
+	uint16_t num
+) {
+	unsigned int leadingZeroes = (unsigned int)__builtin_clz((unsigned int)num);
+
+	return (uint8_t)(leadingZeroes - (sizeof(unsigned int) * CHAR_BIT - 16U));
+}
 #elif defined(_MSC_VER)
 #	include <intrin.h>
 
