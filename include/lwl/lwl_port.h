@@ -52,7 +52,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <stdbool.h>
-#include <stdint.h>
+#include <limits.h>
 
 /*******************************************************************************
 ;
@@ -66,6 +66,32 @@
  * \param	expr_		The asserted boolean expression.
  */
 #define lwl__portAssert(expr_) assert(expr_)
+
+/**
+ * Minimum alignment of list nodes in bytes. The lowest bits of node pointers
+ * that are always zero because of this alignment may be used to store flags,
+ * like the color of red black tree nodes.
+ *
+ * Defaults to the pointer size on architectures that are known to align
+ * pointers to their size, and to 1 (no free bits) on other targets, like 8-bit
+ * AVR. A too small value is always safe, a too large one is not. RISC-V uses 4
+ * for both the 32-bit and the 64-bit variants.
+ *
+ * Define before including the library headers to override. Define as 1 when
+ * nodes are placed in packed structures.
+ */
+#ifndef LWL_PORT_NODE_ALIGNMENT
+#	if defined(__x86_64__) || defined(_M_X64) || \
+		defined(__aarch64__) || defined(_M_ARM64)
+#		define LWL_PORT_NODE_ALIGNMENT 8
+#	elif defined(__i386__) || defined(_M_IX86) || \
+		defined(__arm__) || defined(_M_ARM) ||     \
+		defined(__riscv)
+#		define LWL_PORT_NODE_ALIGNMENT 4
+#	else
+#		define LWL_PORT_NODE_ALIGNMENT 1
+#	endif
+#endif
 
 /*******************************************************************************
 ;
@@ -85,14 +111,33 @@
 ;
 ;-----------------------------------------------------------------------------*/
 #ifdef __GNUC__
-# define lwl__portClz16(num_) ((uint8_t)(__builtin_clz(num_) - 16U))
+/** ****************************************************************************
+ *
+ * 	\brief		Count leading zeroes from 16-bit value.
+ *
+ * 	\param		num		The value to count leading zeroes in. Must not be 0.
+ *
+ * 	\return 	Number of leading zeroes.
+ *
+ * 	\details	__builtin_clz counts the zeroes in an unsigned int, which is
+ * 				16 bits on targets like AVR and MSP430 and 32 bits on most
+ * 				others, so the extra bits of an unsigned int are subtracted.
+ *
+ ******************************************************************************/
+static inline uint8_t lwl__portClz16(
+	uint16_t num
+) {
+	unsigned int leadingZeroes = (unsigned int)__builtin_clz((unsigned int)num);
+
+	return (uint8_t)(leadingZeroes - (sizeof(unsigned int) * CHAR_BIT - 16U));
+}
 #elif defined(_MSC_VER)
-#include <intrin.h>
-static __forceinline uint8_t lwl__portClz16(unsigned short num_)
-{
-    unsigned long idx_;
-    _BitScanReverse(&idx_, num_);
-    return (uint8_t)(15U - idx_);
+#	include <intrin.h>
+
+static __forceinline uint8_t lwl__portClz16(unsigned short num_) {
+	unsigned long idx_;
+	_BitScanReverse(&idx_, num_);
+	return (uint8_t)(15U - idx_);
 }
 #else
 /** ****************************************************************************
@@ -136,4 +181,4 @@ static inline uint8_t lwl__portClz16(
 }
 #endif
 
-#endif  // LWL_PORT_H_INCLUDED
+#endif // LWL_PORT_H_INCLUDED

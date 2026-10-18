@@ -136,6 +136,7 @@ typedef struct {
 void lwl__heapMoveInternal(
 	const lwl_Heap *	pHeap,
 	lwl_HeapNode *		pNode,
+	uint_fast16_t		nodeIdx,
 	const lwl_HeapCmp * pCmp
 );
 
@@ -151,9 +152,10 @@ bool lwl_heapRemove(
 	const lwl_HeapCmp * pCmp
 );
 
-void lwl__heapMoveUp(
+void lwl__heapMoveTowardsLeaves(
 	const lwl_Heap *	pHeap,
 	lwl_HeapNode *		pNode,
+	uint_fast16_t		nodeIdx,
 	const lwl_HeapCmp * pCmp
 );
 
@@ -238,7 +240,7 @@ inline bool lwl_heapMoveNode(
 	}
 
 	if (okToMove) {
-		lwl__heapMoveInternal(pHeap, pHeapNode, pCmp);
+		lwl__heapMoveInternal(pHeap, pHeapNode, pHeapNode->heapIdx, pCmp);
 	}
 
 	return okToMove;
@@ -298,17 +300,10 @@ inline lwl_HeapNode * lwl_heapPopFirst(
 
 	if (pRoot != pLastNode) {
 		/*
-		 * The root node was not the last node of the heap.
-		 * Replace the root node with the last node.
+		 * The node may now be in the wrong place. Move it towards the leaves
+		 * until the heap property is satisfied.
 		 */
-		pElements[0] = pLastNode;
-		pLastNode->heapIdx = 0;
-
-		/*
-		 * The node may now be in the wrong place. Move it up until the heap
-		 * property is satisfied.
-		 */
-		lwl__heapMoveUp(pHeap, pLastNode, pCmp);
+		lwl__heapMoveTowardsLeaves(pHeap, pLastNode, 0, pCmp);
 	}
 
 	return pRoot;

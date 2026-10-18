@@ -61,6 +61,12 @@
 ;
 ;-----------------------------------------------------------------------------*/
 
+/**
+ * The node color is stored in the lowest bit of the parent pointer when nodes
+ * are aligned so that the bit is always zero in node pointers.
+ */
+#define LWL__RB_COLOR_IN_PARENT (LWL_PORT_NODE_ALIGNMENT >= 2)
+
 /*******************************************************************************
 ;
 ;	T Y P E S
@@ -88,18 +94,28 @@ typedef struct lwl__rbTreeNode lwl_RbTreeNode;
 
 /**
  * A node in the Red-Black Tree.
+ *
+ * The parent and color are only accessed with the lwl__rbNode* functions, since
+ * the color may be stored in the lowest bit of the parent pointer.
  */
+#if LWL__RB_COLOR_IN_PARENT
+struct lwl__rbTreeNode {
+	uintptr_t		 parentColor; // Parent pointer, color in the lowest bit
+	lwl_RbTreeNode * children[LWL__RBDIR_COUNT];
+};
+#else
 struct lwl__rbTreeNode {
 	lwl__RbNodeColor color;
 	lwl_RbTreeNode * pParent;
 	lwl_RbTreeNode * children[LWL__RBDIR_COUNT];
 };
+#endif
 
 /**
  * The Red-Black Tree.
  */
 typedef struct {
-	lwl_RbTreeNode * root;	    // Pointer to the root of the tree
+	lwl_RbTreeNode * root;		// Pointer to the root of the tree
 	lwl_RbTreeNode * pLeftmost; // Pointer to the first node of the tree
 } lwl_RbTree;
 
@@ -151,6 +167,106 @@ void lwl_rbTreeRemoveNode(
 
 /** ****************************************************************************
  *
+ * \brief		Get the parent of the supplied node.
+ *
+ * \param[in]	pNode		Pointer to the node.
+ *
+ * \return		Pointer to the parent node. NULL for the root node, and the node
+ * 				itself when the node is not in a tree.
+ *
+ ******************************************************************************/
+inline lwl_RbTreeNode * lwl__rbNodeGetParent(
+	const lwl_RbTreeNode * pNode
+) {
+#if LWL__RB_COLOR_IN_PARENT
+	return (lwl_RbTreeNode *)(pNode->parentColor & ~(uintptr_t)1U);
+#else
+	return pNode->pParent;
+#endif
+}
+
+/** ****************************************************************************
+ *
+ * \brief		Get the color of the supplied node.
+ *
+ * \param[in]	pNode		Pointer to the node.
+ *
+ * \return		The color of the node.
+ *
+ ******************************************************************************/
+inline lwl__RbNodeColor lwl__rbNodeGetColor(
+	const lwl_RbTreeNode * pNode
+) {
+#if LWL__RB_COLOR_IN_PARENT
+	return (lwl__RbNodeColor)(pNode->parentColor & 1U);
+#else
+	return pNode->color;
+#endif
+}
+
+/** ****************************************************************************
+ *
+ * \brief		Set the parent of the supplied node. The color is not changed.
+ *
+ * \param[in]	pNode		Pointer to the node.
+ * \param[in]	pParent		Pointer to the new parent node. May be NULL.
+ *
+ ******************************************************************************/
+inline void lwl__rbNodeSetParent(
+	lwl_RbTreeNode * pNode,
+	lwl_RbTreeNode * pParent
+) {
+#if LWL__RB_COLOR_IN_PARENT
+	pNode->parentColor = (uintptr_t)pParent | (pNode->parentColor & 1U);
+#else
+	pNode->pParent = pParent;
+#endif
+}
+
+/** ****************************************************************************
+ *
+ * \brief		Set the color of the supplied node. The parent is not changed.
+ *
+ * \param[in]	pNode		Pointer to the node.
+ * \param[in]	color		The new color.
+ *
+ ******************************************************************************/
+inline void lwl__rbNodeSetColor(
+	lwl_RbTreeNode * pNode,
+	lwl__RbNodeColor color
+) {
+#if LWL__RB_COLOR_IN_PARENT
+	pNode->parentColor =
+		(pNode->parentColor & ~(uintptr_t)1U) | (uintptr_t)color;
+#else
+	pNode->color = color;
+#endif
+}
+
+/** ****************************************************************************
+ *
+ * \brief		Set both the parent and the color of the supplied node.
+ *
+ * \param[in]	pNode		Pointer to the node.
+ * \param[in]	pParent		Pointer to the new parent node. May be NULL.
+ * \param[in]	color		The new color.
+ *
+ ******************************************************************************/
+inline void lwl__rbNodeSetParentColor(
+	lwl_RbTreeNode * pNode,
+	lwl_RbTreeNode * pParent,
+	lwl__RbNodeColor color
+) {
+#if LWL__RB_COLOR_IN_PARENT
+	pNode->parentColor = (uintptr_t)pParent | (uintptr_t)color;
+#else
+	pNode->pParent = pParent;
+	pNode->color = color;
+#endif
+}
+
+/** ****************************************************************************
+ *
  * \brief		Initializes the Red-Black Tree.
  *
  * \param		pTree		Poiner to the tree that should be initialized.
@@ -178,12 +294,18 @@ inline void lwl_rbNodeInit(
 	lwl_RbTreeNode * pNode
 ) {
 	lwl__portAssert(pNode != NULL);
+#if LWL__RB_COLOR_IN_PARENT
+	// Catches nodes in packed structures, which may not be aligned
+	lwl__portAssert(
+		((uintptr_t)pNode & (LWL_PORT_NODE_ALIGNMENT - 1U)) == 0U
+	);
+#endif
 
 	pNode->children[LWL__RBDIR_LEFT] = NULL;
 	pNode->children[LWL__RBDIR_RIGHT] = NULL;
-	pNode->color = LWL__RBCOLOR_RED;
+
 	// A node pointing to itself is not in a tree
-	pNode->pParent = pNode;
+	lwl__rbNodeSetParentColor(pNode, pNode, LWL__RBCOLOR_RED);
 }
 
 /** ****************************************************************************
@@ -208,7 +330,7 @@ inline bool lwl_rbNodeIsInTree(
 	 * tree. The root node has a NULL parent.
 	 */
 	bool isInTree = false;
-	isInTree = pNode->pParent != pNode;
+	isInTree = lwl__rbNodeGetParent(pNode) != pNode;
 
 	return isInTree;
 }
@@ -219,13 +341,13 @@ inline bool lwl_rbNodeIsInTree(
  *
  * \param[in]	pNode		Parent node.
  *
- * \return		Pointer to the parent node.
+ * \return		Pointer to the leftmost child node.
  *
  * \details
  *
  ******************************************************************************/
 inline lwl_RbTreeNode * lwl_rbTreeGetLeftmostChild(
-	lwl_RbTreeNode *   pNode
+	lwl_RbTreeNode * pNode
 ) {
 	lwl__portAssert(pNode != NULL);
 
@@ -257,7 +379,7 @@ inline lwl_RbTreeNode * lwl_rbTreePeekFirst(
 
 /** ****************************************************************************
  *
- * \brief		Pop node with highest key.
+ * \brief		Pop the first (leftmost) node.
  *
  * \param[in]	pTree 		Pointer to a tree.
  *

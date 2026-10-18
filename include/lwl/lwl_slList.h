@@ -324,4 +324,4 @@ inline lwl_SlListNode * lwl_slListPopFirst(
 	return pNode;
 }
 
-#endif  // LWL_SLLIST_H_INCLUDED
+#endif // LWL_SLLIST_H_INCLUDED
