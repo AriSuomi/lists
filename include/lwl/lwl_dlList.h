@@ -415,7 +415,7 @@ inline bool lwl_dlListPushLast(
 ) {
 	bool isInList = lwl_dlListIsNodeInList(pNew);
 
-	if (isInList == false) {
+	if (!isInList) {
 		lwl_dlListInsertBefore(&pList->sentinel, pNew);
 	}
 
@@ -439,7 +439,7 @@ inline bool lwl_dlListPushFirst(
 ) {
 	bool isInList = lwl_dlListIsNodeInList(pNew);
 
-	if (isInList == false) {
+	if (!isInList) {
 		lwl_dlListInsertBefore(pList->sentinel.pNext, pNew);
 	}
 
@@ -464,6 +464,7 @@ inline lwl_DlListNode * lwl_dlListPeekFirst(
 	if (pHead == &pList->sentinel) {
 		pHead = NULL;
 	}
+
 	return pHead;
 }
 
@@ -488,10 +489,8 @@ inline lwl_DlListNode * lwl_dlListPeekNext(
 	lwl__portAssert(pNode != NULL);
 
 	bool isInList = lwl_dlListIsNodeInList(pNode);
-	if (isInList == true) {
-		if (pNode->pNext != &pList->sentinel) {
-			pNext = pNode->pNext;
-		}
+	if (isInList && (pNode->pNext != &pList->sentinel)) {
+		pNext = pNode->pNext;
 	}
 
 	return pNext;
@@ -522,7 +521,7 @@ inline bool lwl_dlListInsert(
 
 	bool isInList = lwl_dlListIsNodeInList(pNewNode);
 
-	if (isInList == false) {
+	if (!isInList) {
 		lwl__dlListInsertBack(
 			pList,
 			pList->sentinel.pNext,
