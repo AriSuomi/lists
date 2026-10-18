@@ -212,7 +212,7 @@ bool lwl_heapRemove(
 
 	if (pLastNode != pHeapNode) {
 		/*
-		 * The node may now be in the wrong place. Move it towards the leafs or
+		 * The node may now be in the wrong place. Move it towards the leaves or
 		 * root until the heap property is satisfied.
 		 */
 		lwl__heapMoveInternal(pHeap, pLastNode, heapIdx, pCmp);
@@ -240,6 +240,9 @@ static void lwl__heapMoveTowardsRoot(
 	uint_fast16_t		nodeIdx,
 	const lwl_HeapCmp * pCmp
 ) {
+	/*
+	 * Copying variables to local variables to avoid loads inside the loop.
+	 */
 	lwl_HeapCmpFn * pCmpFn = pCmp->pCmpFn;
 	const void *	pCmpParam = pCmp->pCmpParam;
 	lwl_HeapNode ** pElements = pHeap->pElements;
@@ -257,7 +260,7 @@ static void lwl__heapMoveTowardsRoot(
 		}
 
 		/*
-		 * Move parent and continue down.
+		 * Move parent and continue towards root.
 		 */
 		pElements[nodeIdx] = pParent;
 		pParent->heapIdx = nodeIdx;
@@ -271,7 +274,7 @@ static void lwl__heapMoveTowardsRoot(
 
 /** ****************************************************************************
  *
- * \brief		Move a node towards the leafs in the heap.
+ * \brief		Move a node towards the leaves in the heap.
  *
  * \param[in]	pHeap		Pointer to the heap containing the node.
  * \param[in]	pNode		Pointer to the node that should be moved.
@@ -282,12 +285,15 @@ static void lwl__heapMoveTowardsRoot(
  * 				satisfied.
  *
  ******************************************************************************/
-void lwl__heapMoveTowardsLeafs(
+void lwl__heapMoveTowardsLeaves(
 	const lwl_Heap *	pHeap,
 	lwl_HeapNode *		pNode,
 	uint_fast16_t		nodeIdx,
 	const lwl_HeapCmp * pCmp
 ) {
+	/*
+	 * Copying variables to local variables to avoid loads inside the loop.
+	 */
 	uint_fast16_t	nodeCount = pHeap->nodeCount;
 	lwl_HeapCmpFn * pCmpFn = pCmp->pCmpFn;
 	const void *	pCmpParam = pCmp->pCmpParam;
@@ -295,9 +301,8 @@ void lwl__heapMoveTowardsLeafs(
 
 	/*
 	 * Search for a suitable position for the node by moving it towards the
-	 * leafs.
+	 * leaves.
 	 */
-
 	for (;;) {
 		uint_fast16_t childIdx = (nodeIdx << 1U) + 1U;
 		if (childIdx >= nodeCount) {
@@ -368,14 +373,14 @@ void lwl__heapMoveInternal(
 		/*
 		 * It is the root node.
 		 */
-		lwl__heapMoveTowardsLeafs(pHeap, pNode, nodeIdx, pCmp);
+		lwl__heapMoveTowardsLeaves(pHeap, pNode, nodeIdx, pCmp);
 
 	} else {
 		uint_fast16_t  parentIdx = (nodeIdx - 1U) >> 1U;
 		lwl_HeapNode * pParent = pHeap->pElements[parentIdx];
 
 		if (pCmp->pCmpFn(pParent, pNode, pCmp->pCmpParam)) {
-			lwl__heapMoveTowardsLeafs(pHeap, pNode, nodeIdx, pCmp);
+			lwl__heapMoveTowardsLeaves(pHeap, pNode, nodeIdx, pCmp);
 		} else {
 			lwl__heapMoveTowardsRoot(pHeap, pNode, nodeIdx, pCmp);
 		}
