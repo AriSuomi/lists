@@ -81,16 +81,16 @@
  * nodes are placed in packed structures.
  */
 #ifndef LWL_PORT_NODE_ALIGNMENT
-# if defined(__x86_64__) || defined(_M_X64) || \
-	 defined(__aarch64__) || defined(_M_ARM64)
-#  define LWL_PORT_NODE_ALIGNMENT 8
-# elif defined(__i386__) || defined(_M_IX86) || \
-	 defined(__arm__) || defined(_M_ARM) || \
-	 defined(__riscv)
-#  define LWL_PORT_NODE_ALIGNMENT 4
-# else
-#  define LWL_PORT_NODE_ALIGNMENT 1
-# endif
+#	if defined(__x86_64__) || defined(_M_X64) || \
+		defined(__aarch64__) || defined(_M_ARM64)
+#		define LWL_PORT_NODE_ALIGNMENT 8
+#	elif defined(__i386__) || defined(_M_IX86) || \
+		defined(__arm__) || defined(_M_ARM) ||     \
+		defined(__riscv)
+#		define LWL_PORT_NODE_ALIGNMENT 4
+#	else
+#		define LWL_PORT_NODE_ALIGNMENT 1
+#	endif
 #endif
 
 /*******************************************************************************
@@ -111,14 +111,14 @@
 ;
 ;-----------------------------------------------------------------------------*/
 #ifdef __GNUC__
-# define lwl__portClz16(num_) ((uint8_t)(__builtin_clz(num_) - 16U))
+#	define lwl__portClz16(num_) ((uint8_t)(__builtin_clz(num_) - 16U))
 #elif defined(_MSC_VER)
-#include <intrin.h>
-static __forceinline uint8_t lwl__portClz16(unsigned short num_)
-{
-    unsigned long idx_;
-    _BitScanReverse(&idx_, num_);
-    return (uint8_t)(15U - idx_);
+#	include <intrin.h>
+
+static __forceinline uint8_t lwl__portClz16(unsigned short num_) {
+	unsigned long idx_;
+	_BitScanReverse(&idx_, num_);
+	return (uint8_t)(15U - idx_);
 }
 #else
 /** ****************************************************************************
@@ -162,4 +162,4 @@ static inline uint8_t lwl__portClz16(
 }
 #endif
 
-#endif  // LWL_PORT_H_INCLUDED
+#endif // LWL_PORT_H_INCLUDED

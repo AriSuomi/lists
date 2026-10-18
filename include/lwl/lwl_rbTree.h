@@ -115,7 +115,7 @@ struct lwl__rbTreeNode {
  * The Red-Black Tree.
  */
 typedef struct {
-	lwl_RbTreeNode * root;	    // Pointer to the root of the tree
+	lwl_RbTreeNode * root;		// Pointer to the root of the tree
 	lwl_RbTreeNode * pLeftmost; // Pointer to the first node of the tree
 } lwl_RbTree;
 
@@ -179,7 +179,7 @@ inline lwl_RbTreeNode * lwl__rbNodeGetParent(
 	const lwl_RbTreeNode * pNode
 ) {
 #if LWL__RB_COLOR_IN_PARENT
-	return (lwl_RbTreeNode *) (pNode->parentColor & ~(uintptr_t) 1U);
+	return (lwl_RbTreeNode *)(pNode->parentColor & ~(uintptr_t)1U);
 #else
 	return pNode->pParent;
 #endif
@@ -198,7 +198,7 @@ inline lwl__RbNodeColor lwl__rbNodeGetColor(
 	const lwl_RbTreeNode * pNode
 ) {
 #if LWL__RB_COLOR_IN_PARENT
-	return (lwl__RbNodeColor) (pNode->parentColor & 1U);
+	return (lwl__RbNodeColor)(pNode->parentColor & 1U);
 #else
 	return pNode->color;
 #endif
@@ -217,7 +217,7 @@ inline void lwl__rbNodeSetParent(
 	lwl_RbTreeNode * pParent
 ) {
 #if LWL__RB_COLOR_IN_PARENT
-	pNode->parentColor = (uintptr_t) pParent | (pNode->parentColor & 1U);
+	pNode->parentColor = (uintptr_t)pParent | (pNode->parentColor & 1U);
 #else
 	pNode->pParent = pParent;
 #endif
@@ -237,7 +237,7 @@ inline void lwl__rbNodeSetColor(
 ) {
 #if LWL__RB_COLOR_IN_PARENT
 	pNode->parentColor =
-		(pNode->parentColor & ~(uintptr_t) 1U) | (uintptr_t) color;
+		(pNode->parentColor & ~(uintptr_t)1U) | (uintptr_t)color;
 #else
 	pNode->color = color;
 #endif
@@ -258,7 +258,7 @@ inline void lwl__rbNodeSetParentColor(
 	lwl__RbNodeColor color
 ) {
 #if LWL__RB_COLOR_IN_PARENT
-	pNode->parentColor = (uintptr_t) pParent | (uintptr_t) color;
+	pNode->parentColor = (uintptr_t)pParent | (uintptr_t)color;
 #else
 	pNode->pParent = pParent;
 	pNode->color = color;
@@ -297,7 +297,7 @@ inline void lwl_rbNodeInit(
 #if LWL__RB_COLOR_IN_PARENT
 	// Catches nodes in packed structures, which may not be aligned
 	lwl__portAssert(
-		((uintptr_t) pNode & (LWL_PORT_NODE_ALIGNMENT - 1U)) == 0U
+		((uintptr_t)pNode & (LWL_PORT_NODE_ALIGNMENT - 1U)) == 0U
 	);
 #endif
 
@@ -347,7 +347,7 @@ inline bool lwl_rbNodeIsInTree(
  *
  ******************************************************************************/
 inline lwl_RbTreeNode * lwl_rbTreeGetLeftmostChild(
-	lwl_RbTreeNode *   pNode
+	lwl_RbTreeNode * pNode
 ) {
 	lwl__portAssert(pNode != NULL);
 

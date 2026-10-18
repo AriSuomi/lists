@@ -76,9 +76,7 @@ typedef struct {
 	lwl_RbTreeNode node;
 } lwl__RbAlignCheck;
 
-typedef char lwl__rbNodeAlignmentMatchesPort[
-	(offsetof(lwl__RbAlignCheck, node) >= LWL_PORT_NODE_ALIGNMENT) ? 1 : -1
-];
+typedef char lwl__rbNodeAlignmentMatchesPort[(offsetof(lwl__RbAlignCheck, node) >= LWL_PORT_NODE_ALIGNMENT) ? 1 : -1];
 #endif
 
 /*******************************************************************************

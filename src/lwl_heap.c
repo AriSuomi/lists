@@ -288,7 +288,7 @@ void lwl__heapMoveTowardsLeafs(
 	uint_fast16_t		nodeIdx,
 	const lwl_HeapCmp * pCmp
 ) {
-	uint_fast16_t nodeCount = pHeap->nodeCount;
+	uint_fast16_t	nodeCount = pHeap->nodeCount;
 	lwl_HeapCmpFn * pCmpFn = pCmp->pCmpFn;
 	const void *	pCmpParam = pCmp->pCmpParam;
 	lwl_HeapNode ** pElements = pHeap->pElements;

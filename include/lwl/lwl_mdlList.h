@@ -235,7 +235,7 @@ inline bool lwl_mdlListRemove(
 	bool wasRemoved = lwl_dlListRemove(&pNode->dlListNode);
 
 	if (wasRemoved) {
-		uint_fast8_t listIdx = pNode->listIdx;
+		uint_fast8_t	 listIdx = pNode->listIdx;
 		lwl_DlList *	 pList = &pMdlList->pLists[listIdx];
 		lwl_DlListNode * pLastNode = lwl_dlListPeekLast(pList);
 		if (pLastNode == NULL) {

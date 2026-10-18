@@ -321,8 +321,8 @@ static lwl_PtrHeapNode * lwl__ptrHeapGetLastNode(
 	 * The node count bits are left aligned here to make it easier to start
 	 * checking bits from the most significant.
 	 */
-	uint16_t nodeCount = pHeap->nodeCount;
-	uint8_t leadingZeroes = lwl__portClz16(nodeCount);
+	uint16_t	  nodeCount = pHeap->nodeCount;
+	uint8_t		  leadingZeroes = lwl__portClz16(nodeCount);
 	uint_fast16_t path = (uint_fast16_t)(nodeCount << leadingZeroes);
 
 	/*
@@ -502,8 +502,7 @@ static void lwl__ptrHeapMoveDown(
 	 */
 	while (
 		pNode->pParent != &lwl__ptrHeapRootParent &&
-		pCmp->pCmpFn(pNode, pNode->pParent, pCmp->pCmpParam)
-	) {
+		pCmp->pCmpFn(pNode, pNode->pParent, pCmp->pCmpParam)) {
 		lwl__ptrHeapSwapAdjacentNodes(pHeap, pNode->pParent, pNode);
 	}
 }
