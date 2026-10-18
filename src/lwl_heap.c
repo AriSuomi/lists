@@ -248,7 +248,7 @@ static void lwl__heapMoveTowardsRoot(
 	lwl_HeapNode ** pElements = pHeap->pElements;
 
 	while (nodeIdx != 0U) {
-		uint_fast16_t  parentIndex = (nodeIdx - 1U) >> 1U;
+		uint_fast16_t  parentIndex = (uint_fast16_t)((nodeIdx - 1U) >> 1U);
 		lwl_HeapNode * pParent = pElements[parentIndex];
 
 		/*
@@ -263,13 +263,13 @@ static void lwl__heapMoveTowardsRoot(
 		 * Move parent and continue towards root.
 		 */
 		pElements[nodeIdx] = pParent;
-		pParent->heapIdx = nodeIdx;
+		pParent->heapIdx = (lwl_HeapIdx)nodeIdx;
 
 		nodeIdx = parentIndex;
 	}
 
 	pElements[nodeIdx] = pNode;
-	pNode->heapIdx = nodeIdx;
+	pNode->heapIdx = (lwl_HeapIdx)nodeIdx;
 }
 
 /** ****************************************************************************
@@ -300,18 +300,23 @@ void lwl__heapMoveTowardsLeaves(
 	lwl_HeapNode ** pElements = pHeap->pElements;
 
 	/*
+	 * Nodes from this index on have no children. Checking against this instead
+	 * of calculating the child index first avoids an overflow when
+	 * uint_fast16_t is 16 bits and the heap has more than 32767 nodes.
+	 */
+	uint_fast16_t firstLeafIdx = (uint_fast16_t)(nodeCount >> 1U);
+
+	/*
 	 * Search for a suitable position for the node by moving it towards the
 	 * leaves.
 	 */
-	for (;;) {
-		uint_fast16_t childIdx = (nodeIdx << 1U) + 1U;
-		if (childIdx >= nodeCount) {
-			break;
-		}
+	while (nodeIdx < firstLeafIdx) {
+		uint_fast16_t childIdx =
+			(uint_fast16_t)(((unsigned int)nodeIdx << 1U) + 1U);
 
 		lwl_HeapNode * pFirst = pElements[childIdx];
 
-		uint_fast16_t rightIdx = childIdx + 1U;
+		uint_fast16_t rightIdx = (uint_fast16_t)(childIdx + 1U);
 		if (rightIdx < nodeCount) {
 			/*
 			 * There is a left and right child. Check which one should be first
@@ -335,7 +340,7 @@ void lwl__heapMoveTowardsLeaves(
 		}
 
 		pElements[nodeIdx] = pFirst;
-		pFirst->heapIdx = nodeIdx;
+		pFirst->heapIdx = (lwl_HeapIdx)nodeIdx;
 
 		/*
 		 * Move to the child and continue searching for a valid position.
@@ -344,7 +349,7 @@ void lwl__heapMoveTowardsLeaves(
 	}
 
 	pElements[nodeIdx] = pNode;
-	pNode->heapIdx = nodeIdx;
+	pNode->heapIdx = (lwl_HeapIdx)nodeIdx;
 }
 
 /** ****************************************************************************
@@ -376,7 +381,7 @@ void lwl__heapMoveInternal(
 		lwl__heapMoveTowardsLeaves(pHeap, pNode, nodeIdx, pCmp);
 
 	} else {
-		uint_fast16_t  parentIdx = (nodeIdx - 1U) >> 1U;
+		uint_fast16_t  parentIdx = (uint_fast16_t)((nodeIdx - 1U) >> 1U);
 		lwl_HeapNode * pParent = pHeap->pElements[parentIdx];
 
 		if (pCmp->pCmpFn(pParent, pNode, pCmp->pCmpParam)) {
