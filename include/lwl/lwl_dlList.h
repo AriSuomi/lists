@@ -501,7 +501,7 @@ inline lwl_DlListNode * lwl_dlListPeekNext(
  * \brief		Insert the supplied node to the list.
  *
  * \param[in]	pList		Pointer to list.
- * \param[in]	isInList	Pointer to node that should be pushed.
+ * \param[in]	pNewNode	Pointer to node that should be inserted.
  * \param[in]	pCmp		Pointer to node comparison information.
  *
  * \retval		true		The Node was inserted successfully.

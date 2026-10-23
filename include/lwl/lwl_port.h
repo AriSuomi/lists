@@ -1,6 +1,6 @@
 /** ****************************************************************************
  *
- * 	\file	lwo_port.h
+ * 	\file	lwl_port.h
  *
  * 	\brief	Header file for LwL porting macros.
  *
@@ -144,7 +144,7 @@ static __forceinline uint8_t lwl__portClz16(unsigned short num_) {
  *
  * 	\brief		Count leading zeroes from 16-bit value.
  *
- * 	\param		num		The value to count leading zeroes in.
+ * 	\param		num		The value to count leading zeroes in. Must not be 0.
  *
  * 	\return 	Number of leading zeroes.
  *

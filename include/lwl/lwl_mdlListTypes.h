@@ -93,4 +93,4 @@ typedef struct {
 ;
 ;-----------------------------------------------------------------------------*/
 
-#endif /* LWL_MDLLIST_H_INCLUDED */
+#endif /* LWL_MDLLISTTYPES_H_INCLUDED */

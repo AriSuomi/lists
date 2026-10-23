@@ -114,7 +114,7 @@ inline void lwl_mdlListNodeInit(
  * \param[in]	pMdlList	Pointer to the list.
  * \param[in]	pDlLists	Pointer to array of lists.
  * \param[in]	listCount	Number of lists in the array. Must be a value from
- * 							1 to 254.
+ * 							1 to 16.
  *
  ******************************************************************************/
 inline void lwl_mdlListInit(
