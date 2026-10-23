@@ -105,12 +105,20 @@ extern inline void lwl_dlListSneekFirst(
 	lwl_DlListNode * pNode
 );
 
+extern inline bool lwl_dlListIsNodeInList(
+	const lwl_DlListNode * pNode
+);
+
+extern inline bool lwl_dlListRemove(
+	lwl_DlListNode * pNode
+);
+
 extern inline lwl_DlListNode * lwl_dlListPopLast(
 	lwl_DlList * pList
 );
 
-extern inline bool lwl_dlListIsNodeInList(
-	const lwl_DlListNode * pNode
+extern inline lwl_DlListNode * lwl_dlListPopFirst(
+	lwl_DlList * pList
 );
 
 extern inline void lwl_dlListInsertBefore(
@@ -123,21 +131,18 @@ extern inline bool lwl_dlListPushLast(
 	lwl_DlListNode * pNew
 );
 
-extern inline lwl_DlListNode * lwl_dlListPeekFirst(
-	const lwl_DlList * pList
+extern inline bool lwl_dlListPushFirst(
+	lwl_DlList *	 pList,
+	lwl_DlListNode * pNew
 );
 
-extern inline lwl_DlListNode * lwl_dlListPopFirst(
-	lwl_DlList * pList
+extern inline lwl_DlListNode * lwl_dlListPeekFirst(
+	const lwl_DlList * pList
 );
 
 extern inline lwl_DlListNode * lwl_dlListPeekNext(
 	const lwl_DlList *	   pList,
 	const lwl_DlListNode * pNode
-);
-
-extern inline bool lwl_dlListRemove(
-	lwl_DlListNode * pNode
 );
 
 extern inline bool lwl_dlListInsert(
@@ -178,6 +183,9 @@ bool lwl_dlListMoveNode(
 	lwl_DlListNode *	  pNode,
 	const lwl_DlListCmp * pCmp
 ) {
+	lwl__portAssert(pList != NULL);
+	lwl__portAssert(pNode != NULL);
+
 	/*
 	 * First remove the node from the list.
 	 */
