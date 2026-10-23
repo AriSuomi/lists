@@ -152,10 +152,6 @@ static __forceinline uint8_t lwl__portClz16(unsigned short num_) {
 static inline uint8_t lwl__portClz16(
 	uint16_t num
 ) {
-	if (num == 0U) {
-		return 16;
-	}
-
 	uint8_t count = 0U;
 
 	if ((num & 0xFF00) == 0U) {
