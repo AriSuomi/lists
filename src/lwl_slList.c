@@ -162,9 +162,10 @@ bool lwl_slListInsert(
 		lwl_SlListNode * pListNode = pPrevListNode->pNext;
 
 		while (pListNode != &pList->sentinel) {
-			bool foundSpot = pCmp->pCmpFn(pListNode, pNewNode, pCmp->pCmpParam);
+			bool notFound = pCmp->pCmpFn(pListNode, pNewNode, pCmp->pCmpParam);
 
-			if (foundSpot) {
+			if (!notFound) {
+				/* Found the spot. The new node should be before this list node. */
 				break;
 			}
 
@@ -211,11 +212,10 @@ bool lwl_slListRemove(
 
 	lwl__portAssert(pList != NULL);
 	lwl__portAssert(pNode != NULL);
-	lwl__portAssert(pList->sentinel.pNext != &pList->sentinel);
 
 	bool isInList = lwl_slListIsNodeInList(pNode);
 
-	if (!isInList && pList->sentinel.pNext != &pList->sentinel) {
+	if (isInList && pList->sentinel.pNext != &pList->sentinel) {
 		/*
 		 * The node is in a list and the supplied list is not empty.
 		 * Iterate the list until the node is found.
@@ -237,7 +237,7 @@ bool lwl_slListRemove(
 				/*
 				 * The last node was removed.
 				 */
-				pList->pLast = &pList->sentinel;
+				pList->pLast = pPrevListNode;
 			}
 
 			/*
