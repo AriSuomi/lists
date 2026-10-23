@@ -342,7 +342,7 @@ void lwl_rbTreeRemoveNode(
 	}
 
 	// Mark the node as not being in a tree
-	lwl__rbNodeSetParent(pNode, pNode);
+	lwl__rbNodeSetParentColor(pNode, pNode, LWL__RBCOLOR_RED);
 }
 
 /** ****************************************************************************
