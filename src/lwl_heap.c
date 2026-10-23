@@ -95,15 +95,6 @@ extern inline void lwl_heapInit(
 	lwl_HeapIdx	   arraySize
 );
 
-extern inline lwl_HeapNode * lwl_heapPeekFirst(
-	const lwl_Heap * pHeap
-);
-
-extern inline lwl_HeapNode * lwl_heapPopFirst(
-	lwl_Heap *			pHeap,
-	const lwl_HeapCmp * pCmp
-);
-
 extern inline bool lwl_heapIsNodeInHeap(
 	const lwl_HeapNode * pNode
 );
@@ -112,6 +103,24 @@ extern inline bool lwl_heapMoveNode(
 	const lwl_Heap *	pHeap,
 	lwl_HeapNode *		pHeapNode,
 	const lwl_HeapCmp * pCmp
+);
+
+extern inline lwl_HeapNode * lwl_heapPeekFirst(
+	const lwl_Heap * pHeap
+);
+
+extern inline lwl_HeapNode * lwl__heapRemoveLastNode(
+	lwl_Heap * pHeap
+);
+
+extern inline lwl_HeapNode * lwl_heapPopFirst(
+	lwl_Heap *			pHeap,
+	const lwl_HeapCmp * pCmp
+);
+
+extern inline void lwl_heapSetRootNode(
+	lwl_Heap *	   pHeap,
+	lwl_HeapNode * pNode
 );
 
 /*******************************************************************************
@@ -199,15 +208,8 @@ bool lwl_heapRemove(
 		return false;
 	}
 
-	/*
-	 * First remove the last node from the heap.
-	 */
-	lwl_HeapNode ** pElements = pHeap->pElements;
-	pHeap->nodeCount--;
-	lwl_HeapNode * pLastNode = pElements[pHeap->nodeCount];
-	pElements[pHeap->nodeCount] = NULL;
-
-	uint_fast16_t heapIdx = pHeapNode->heapIdx;
+	lwl_HeapNode * pLastNode = lwl__heapRemoveLastNode(pHeap);
+	uint_fast16_t  heapIdx = pHeapNode->heapIdx;
 	pHeapNode->heapIdx = LWL__HEAP_INV_IDX;
 
 	if (pLastNode != pHeapNode) {

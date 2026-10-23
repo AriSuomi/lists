@@ -268,6 +268,35 @@ inline lwl_HeapNode * lwl_heapPeekFirst(
 
 /** ****************************************************************************
  *
+ * \brief		Remove the last node from the heap.
+ *
+ * \param[in]	pHeap 		Pointer to the heap.
+ *
+ * \return		Pointer to the removed node.
+ *
+ * \details		Takes the last node out of the array. The heap must not be
+ * 				empty.
+ *
+ ******************************************************************************/
+inline lwl_HeapNode * lwl__heapRemoveLastNode(
+	lwl_Heap * pHeap
+) {
+	lwl_HeapNode ** pElements = pHeap->pElements;
+
+	lwl__portAssert(pHeap->nodeCount > 0U);
+
+	pHeap->nodeCount--;
+	lwl_HeapNode * pLastNode = pElements[pHeap->nodeCount];
+
+#ifndef NDEBUG
+	pElements[pHeap->nodeCount] = NULL;
+#endif
+
+	return pLastNode;
+}
+
+/** ****************************************************************************
+ *
  * \brief		Pop the first node.
  *
  * \param[in]	pHeap 		Pointer to the heap.
@@ -288,14 +317,8 @@ inline lwl_HeapNode * lwl_heapPopFirst(
 		return NULL;
 	}
 
-	/*
-	 * First remove the last node from the heap.
-	 */
-	lwl_HeapNode ** pElements = pHeap->pElements;
-	pHeap->nodeCount--;
-	lwl_HeapNode * pLastNode = pElements[pHeap->nodeCount];
-
-	lwl_HeapNode * pRoot = pElements[0];
+	lwl_HeapNode * pRoot = pHeap->pElements[0];
+	lwl_HeapNode * pLastNode = lwl__heapRemoveLastNode(pHeap);
 	pRoot->heapIdx = LWL__HEAP_INV_IDX;
 
 	if (pRoot != pLastNode) {
