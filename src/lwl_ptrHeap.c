@@ -96,8 +96,9 @@ static void lwl__ptrHeapReplaceNode(
 	lwl_PtrHeapNode *		pReplacement
 );
 
-static lwl_PtrHeapNode * lwl__ptrHeapGetLastNode(
-	const lwl_PtrHeap * pHeap
+static inline lwl_PtrHeapNode ** lwl__ptrHeapGetLastSlot(
+	lwl_PtrHeap *	   pHeap,
+	lwl_PtrHeapNode ** ppParent
 );
 
 static void lwl__ptrHeapMoveTowardsLeaves(
@@ -196,37 +197,25 @@ bool lwl_ptrHeapInsert(
 		 */
 		pHeap->nodeCount++;
 
-		if (pHeap->pRoot == NULL) {
-			/*
-			 * The heap is empty. Add the new node as the root node.
-			 */
-			pNewNode->pParent = &lwl__ptrHeapRootParent;
-			pHeap->pRoot = pNewNode;
+		/*
+		 * Find the next free spot in the tree. The node count has already
+		 * been incremented so the lwl__ptrHeapGetLastSlot function will
+		 * return the next free spot in the heap. In an empty heap it is the
+		 * root pointer.
+		 */
+		lwl_PtrHeapNode *  pParent;
+		lwl_PtrHeapNode ** ppSlot = lwl__ptrHeapGetLastSlot(pHeap, &pParent);
 
-		} else {
-			/*
-			 * Find the next free spot in the tree. The node count has already
-			 * been incremented so the lwl__ptrHeapGetLastNode function will
-			 * return the parent node of the next free spot in the heap.
-			 */
-			lwl_PtrHeapNode * pParent = lwl__ptrHeapGetLastNode(pHeap);
+		/*
+		 * Insert the new node to the next free spot.
+		 */
+		*ppSlot = pNewNode;
+		pNewNode->pParent = pParent;
 
-			/*
-			 * Insert the new node to the next free spot.
-			 */
-			if (pParent->pLeft == NULL) {
-				pParent->pLeft = pNewNode;
-			} else {
-				pParent->pRight = pNewNode;
-			}
-
-			pNewNode->pParent = pParent;
-
-			/*
-			 * Move the inserted node to the correct position.
-			 */
-			lwl__ptrHeapMoveTowardsRoot(pHeap, pNewNode, pCmp);
-		}
+		/*
+		 * Move the inserted node to the correct position.
+		 */
+		lwl__ptrHeapMoveTowardsRoot(pHeap, pNewNode, pCmp);
 
 		wasInserted = true;
 	}
@@ -263,11 +252,12 @@ bool lwl_ptrHeapRemove(
 
 	if (isInHeap) {
 		/*
-		 * Cut the last node from the heap by grafting a NULL into the heap
-		 * as a replacement.
+		 * Cut the last node from the heap by clearing the pointer to it.
 		 */
-		lwl_PtrHeapNode * pLastNode = lwl__ptrHeapGetLastNode(pHeap);
-		lwl__ptrHeapGraftNode(pHeap, pLastNode, NULL);
+		lwl_PtrHeapNode *  pLastParent;
+		lwl_PtrHeapNode ** ppLastSlot = lwl__ptrHeapGetLastSlot(pHeap, &pLastParent);
+		lwl_PtrHeapNode *  pLastNode = *ppLastSlot;
+		*ppLastSlot = NULL;
 
 		if (pLastNode != pNode) {
 			/*
@@ -302,15 +292,26 @@ bool lwl_ptrHeapRemove(
 
 /** ****************************************************************************
  *
- * \brief		Get the last node of the heap.
+ * \brief		Get the pointer that points to the last node of the heap.
  *
  * \param[in]	pHeap		Pointer to the heap.
+ * \param[out]	ppParent	The parent of the last node is stored here. It is
+ * 							the root parent sentinel if the last node is the
+ * 							root.
  *
- * \return		Pointer to the last node or NULL if the heap is empty.
+ * \return		Pointer to the root pointer or to the child pointer of the
+ * 				parent node that points to the last node.
+ *
+ * \details		The node count decides which node is the last node. The
+ * 				returned pointer does not have to point to a node yet, so
+ * 				incrementing the node count first gives the next free spot.
+ * 				It is inline because GCC does not inline it into its two
+ * 				callers otherwise, which costs a call on every insert and remove.
  *
  ******************************************************************************/
-static lwl_PtrHeapNode * lwl__ptrHeapGetLastNode(
-	const lwl_PtrHeap * pHeap
+static inline lwl_PtrHeapNode ** lwl__ptrHeapGetLastSlot(
+	lwl_PtrHeap *	   pHeap,
+	lwl_PtrHeapNode ** ppParent
 ) {
 	uint16_t nodeCount = pHeap->nodeCount;
 	lwl__portAssert(nodeCount != 0U);
@@ -319,30 +320,50 @@ static lwl_PtrHeapNode * lwl__ptrHeapGetLastNode(
 	 * First determine the path to the last node. The node count can be used
 	 * as a path to the last node. Each bit from most significant to the least
 	 * significant tells which direction to take when traversing the tree.
+	 * The most significant set bit is the root, so the number of bits after
+	 * it is the depth of the last node.
 	 *
 	 * The node count bits are left aligned here to make it easier to start
 	 * checking bits from the most significant.
 	 */
 	uint8_t		  leadingZeroes = lwl__portClz16(nodeCount);
+	uint_fast8_t  depth = (uint_fast8_t)(15U - leadingZeroes);
 	uint_fast16_t path = (uint_fast16_t)(nodeCount << leadingZeroes);
 
-	/*
-	 * Traverse the path to the last node.
-	 */
-	lwl_PtrHeapNode * pNode = pHeap->pRoot;
-	lwl_PtrHeapNode * pNextNode = pNode;
+	lwl_PtrHeapNode ** ppSlot = &pHeap->pRoot;
+	lwl_PtrHeapNode *  pParent = &lwl__ptrHeapRootParent;
 
-	while (pNextNode != NULL) {
-		pNode = pNextNode;
+	if (depth > 0U) {
+		/*
+		 * Traverse the path to the parent of the last node. The loop count is
+		 * known in advance so the child pointer of the last node is never
+		 * read. Each step loads a child node instead of selecting a slot
+		 * pointer. This lets compilers use a branch, which is faster than a
+		 * conditional move when the path is predictable.
+		 */
+		pParent = pHeap->pRoot;
+
+		while (depth > 1U) {
+			path <<= 1U;
+			if ((path & LWL__PTRHEAP_U16_MSB) == 0U) {
+				pParent = pParent->pLeft;
+			} else {
+				pParent = pParent->pRight;
+			}
+			depth--;
+		}
+
 		path <<= 1U;
 		if ((path & LWL__PTRHEAP_U16_MSB) == 0U) {
-			pNextNode = pNode->pLeft;
+			ppSlot = &pParent->pLeft;
 		} else {
-			pNextNode = pNode->pRight;
+			ppSlot = &pParent->pRight;
 		}
 	}
 
-	return pNode;
+	*ppParent = pParent;
+
+	return ppSlot;
 }
 
 /** ****************************************************************************
@@ -497,13 +518,16 @@ static void lwl__ptrHeapMoveTowardsRoot(
 	lwl_PtrHeapNode *	   pNode,
 	const lwl_PtrHeapCmp * pCmp
 ) {
+	lwl_PtrHeapCmpFn * pCmpFn = pCmp->pCmpFn;
+	const void *	   pCmpParam = pCmp->pCmpParam;
+
 	/*
 	 * Swap the position of the node and an adjacent node until we get a valid
 	 * heap.
 	 */
 	while (
 		pNode->pParent != &lwl__ptrHeapRootParent &&
-		pCmp->pCmpFn(pNode, pNode->pParent, pCmp->pCmpParam)) {
+		pCmpFn(pNode, pNode->pParent, pCmpParam)) {
 		lwl__ptrHeapSwapAdjacentNodes(pHeap, pNode->pParent, pNode);
 	}
 }
@@ -522,7 +546,9 @@ static void lwl__ptrHeapMoveTowardsLeaves(
 	lwl_PtrHeapNode *	   pNode,
 	const lwl_PtrHeapCmp * pCmp
 ) {
-	lwl_PtrHeapNode * pLeft = pNode->pLeft;
+	lwl_PtrHeapCmpFn * pCmpFn = pCmp->pCmpFn;
+	const void *	   pCmpParam = pCmp->pCmpParam;
+	lwl_PtrHeapNode *  pLeft = pNode->pLeft;
 
 	/*
 	 * Swap the position of the node and one of its child nodes until the
@@ -534,14 +560,14 @@ static void lwl__ptrHeapMoveTowardsLeaves(
 		 * should be before the node.
 		 */
 		lwl_PtrHeapNode * pFirst = pNode;
-		if (pCmp->pCmpFn(pLeft, pFirst, pCmp->pCmpParam)) {
+		if (pCmpFn(pLeft, pFirst, pCmpParam)) {
 			pFirst = pLeft;
 		}
 
 		lwl_PtrHeapNode * pRight = pNode->pRight;
 		if (
 			pRight != NULL &&
-			pCmp->pCmpFn(pRight, pFirst, pCmp->pCmpParam)
+			pCmpFn(pRight, pFirst, pCmpParam)
 		) {
 			/*
 			 * The node has a right child that should be before the node
