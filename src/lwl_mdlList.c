@@ -147,7 +147,7 @@ lwl_MdlListNode * lwl_mdlListPeekFirst(
 	lwl_MdlListNode * pFirst = NULL;
 
 	uint16_t listMap = pMdlList->listMap;
-	if (listMap != 0) {
+	if (listMap != 0U) {
 		uint_fast8_t listIdx =
 			((sizeof(listMap) * LWL__MDLLIST_BITSPERBYTE) - 1U) -
 			lwl__portClz16(listMap);

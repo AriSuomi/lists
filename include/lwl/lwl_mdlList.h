@@ -125,7 +125,7 @@ inline void lwl_mdlListInit(
 	lwl__portAssert(pMdlList != NULL);
 	lwl__portAssert(pDlLists != NULL);
 
-	if (listCount > 0 && listCount <= sizeof(uint16_t) * CHAR_BIT) {
+	if (listCount > 0U && listCount <= sizeof(uint16_t) * CHAR_BIT) {
 		for (uint8_t listIdx = 0; listIdx < listCount; listIdx++) {
 			lwl_dlListInit(&pDlLists[listIdx]);
 		}
@@ -162,12 +162,15 @@ inline bool lwl_mdlListInsert(
 	bool wasInserted = false;
 
 	if (listIdx < sizeof(uint16_t) * CHAR_BIT) {
-		pNew->listIdx = listIdx;
-		pMdlList->listMap |= (uint16_t)(1U << listIdx);
 		wasInserted = lwl_dlListPushLast(
 			&pMdlList->pLists[listIdx],
 			&pNew->dlListNode
 		);
+
+		if (wasInserted) {
+			pNew->listIdx = listIdx;
+			pMdlList->listMap |= (uint16_t)(1U << listIdx);
+		}
 
 	} else {
 		lwl__portAssert(false);
@@ -202,7 +205,6 @@ inline void lwl_mdlListStorePtr(
  * \brief		Get the pointer stored with lwl_mdlListStorePtr.
  *
  * \param[in]	pMdlList	Pointer to list.
- * \param[in]	pNew		Pointer to node that should be inserted.
  *
  * \return		The pointer that has been stored with lwl_mdlListStorePtr().
  *
