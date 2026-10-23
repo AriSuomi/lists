@@ -100,13 +100,13 @@ static lwl_PtrHeapNode * lwl__ptrHeapGetLastNode(
 	const lwl_PtrHeap * pHeap
 );
 
-static void lwl__ptrHeapMoveUp(
+static void lwl__ptrHeapMoveTowardsLeaves(
 	lwl_PtrHeap *		   pHeap,
 	lwl_PtrHeapNode *	   pNode,
 	const lwl_PtrHeapCmp * pCmp
 );
 
-static void lwl__ptrHeapMoveDown(
+static void lwl__ptrHeapMoveTowardsRoot(
 	lwl_PtrHeap *		   pHeap,
 	lwl_PtrHeapNode *	   pNode,
 	const lwl_PtrHeapCmp * pCmp
@@ -190,7 +190,7 @@ bool lwl_ptrHeapInsert(
 	bool wasInserted = false;
 	bool isInHeap = lwl_ptrHeapIsNodeInHeap(pNewNode);
 
-	if (!isInHeap) {
+	if (!isInHeap && pHeap->nodeCount < 0xFFFFU) {
 		/*
 		 * The node is not yet in a heap. Continue with the insert.
 		 */
@@ -225,7 +225,7 @@ bool lwl_ptrHeapInsert(
 			/*
 			 * Move the inserted node to the correct position.
 			 */
-			lwl__ptrHeapMoveDown(pHeap, pNewNode, pCmp);
+			lwl__ptrHeapMoveTowardsRoot(pHeap, pNewNode, pCmp);
 		}
 
 		wasInserted = true;
@@ -312,6 +312,9 @@ bool lwl_ptrHeapRemove(
 static lwl_PtrHeapNode * lwl__ptrHeapGetLastNode(
 	const lwl_PtrHeap * pHeap
 ) {
+	uint16_t nodeCount = pHeap->nodeCount;
+	lwl__portAssert(nodeCount != 0U);
+
 	/*
 	 * First determine the path to the last node. The node count can be used
 	 * as a path to the last node. Each bit from most significant to the least
@@ -320,7 +323,6 @@ static lwl_PtrHeapNode * lwl__ptrHeapGetLastNode(
 	 * The node count bits are left aligned here to make it easier to start
 	 * checking bits from the most significant.
 	 */
-	uint16_t	  nodeCount = pHeap->nodeCount;
 	uint8_t		  leadingZeroes = lwl__portClz16(nodeCount);
 	uint_fast16_t path = (uint_fast16_t)(nodeCount << leadingZeroes);
 
@@ -483,14 +485,14 @@ static void lwl__ptrHeapSwapAdjacentNodes(
 
 /** ****************************************************************************
  *
- * \brief	Move a node down in the heap until a valid position is found.
+ * \brief	Move a node towards the root until a valid position is found.
  *
  * \param	pHeap			Pointer to the heap.
  * \param	pNode			Pointer to node that should be moved.
  * \param	pCmp			Pointer to comparison information.
  *
  ******************************************************************************/
-static void lwl__ptrHeapMoveDown(
+static void lwl__ptrHeapMoveTowardsRoot(
 	lwl_PtrHeap *		   pHeap,
 	lwl_PtrHeapNode *	   pNode,
 	const lwl_PtrHeapCmp * pCmp
@@ -508,14 +510,14 @@ static void lwl__ptrHeapMoveDown(
 
 /** ****************************************************************************
  *
- * \brief	Move a node up in the heap until a valid position is found.
+ * \brief	Move a node towards the leaves until a valid position is found.
  *
  * \param	pHeap			Pointer to the heap.
  * \param	pNode			Pointer to node that should be moved.
  * \param	pCmp			Pointer to comparison information.
  *
  ******************************************************************************/
-static void lwl__ptrHeapMoveUp(
+static void lwl__ptrHeapMoveTowardsLeaves(
 	lwl_PtrHeap *		   pHeap,
 	lwl_PtrHeapNode *	   pNode,
 	const lwl_PtrHeapCmp * pCmp
@@ -589,8 +591,8 @@ void lwl__ptrHeapMoveInternal(
 		pParent == &lwl__ptrHeapRootParent ||
 		pCmp->pCmpFn(pParent, pNode, pCmp->pCmpParam)
 	) {
-		lwl__ptrHeapMoveUp(pHeap, pNode, pCmp);
+		lwl__ptrHeapMoveTowardsLeaves(pHeap, pNode, pCmp);
 	} else {
-		lwl__ptrHeapMoveDown(pHeap, pNode, pCmp);
+		lwl__ptrHeapMoveTowardsRoot(pHeap, pNode, pCmp);
 	}
 }
