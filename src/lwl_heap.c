@@ -356,6 +356,78 @@ void lwl__heapMoveTowardsLeaves(
 
 /** ****************************************************************************
  *
+ * \brief		Fill an empty root position and insert a node into the heap.
+ *
+ * \param[in]	pHeap		Pointer to the heap. Its root position is empty.
+ * \param[in]	pNode		Pointer to the node that should be inserted. It is
+ * 							usually the node that was the last node.
+ * \param[in]	pCmp		Pointer to the node comparing information.
+ *
+ * \details		This is the bottom-up heap sift (Floyd). The empty position is
+ * 				first moved all the way to a leaf by moving up the child that
+ * 				should be first. This needs only one compare per level, while
+ * 				lwl__heapMoveTowardsLeaves needs two. The node is then moved
+ * 				towards the root from the leaf. The last node usually belongs
+ * 				near the leaves, so it rarely moves far.
+ *
+ ******************************************************************************/
+void lwl__heapMoveToEmptyRoot(
+	const lwl_Heap *	pHeap,
+	lwl_HeapNode *		pNode,
+	const lwl_HeapCmp * pCmp
+) {
+	/*
+	 * Copying variables to local variables to avoid loads inside the loop.
+	 */
+	uint_fast16_t	nodeCount = pHeap->nodeCount;
+	lwl_HeapCmpFn * pCmpFn = pCmp->pCmpFn;
+	const void *	pCmpParam = pCmp->pCmpParam;
+	lwl_HeapNode ** pElements = pHeap->pElements;
+
+	/*
+	 * Nodes from this index on have no children. See
+	 * lwl__heapMoveTowardsLeaves.
+	 */
+	uint_fast16_t firstLeafIdx = (uint_fast16_t)(nodeCount >> 1U);
+	uint_fast16_t emptyIdx = 0U;
+
+	/*
+	 * Move the empty position to a leaf.
+	 */
+	while (emptyIdx < firstLeafIdx) {
+		uint_fast16_t childIdx =
+			(uint_fast16_t)(((unsigned int)emptyIdx << 1U) + 1U);
+
+		lwl_HeapNode * pFirst = pElements[childIdx];
+
+		uint_fast16_t rightIdx = (uint_fast16_t)(childIdx + 1U);
+		if (rightIdx < nodeCount) {
+			/*
+			 * There is a left and right child. Check which one should be first
+			 * in the heap.
+			 */
+			lwl_HeapNode * pRight = pElements[rightIdx];
+			if (pCmpFn(pRight, pFirst, pCmpParam)) {
+				pFirst = pRight;
+				childIdx = rightIdx;
+			}
+		}
+
+		pElements[emptyIdx] = pFirst;
+		pFirst->heapIdx = (lwl_HeapIdx)emptyIdx;
+
+		emptyIdx = childIdx;
+	}
+
+	/*
+	 * Put the node into the empty leaf position and move it towards the root
+	 * until the heap property is satisfied.
+	 */
+	lwl__heapMoveTowardsRoot(pHeap, pNode, emptyIdx, pCmp);
+}
+
+/** ****************************************************************************
+ *
  * \brief		Move a node in a heap.
  *
  * \param[in]	pHeap		Pointer to the heap containing the node.

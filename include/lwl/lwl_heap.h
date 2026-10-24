@@ -159,6 +159,12 @@ void lwl__heapMoveTowardsLeaves(
 	const lwl_HeapCmp * pCmp
 );
 
+void lwl__heapMoveToEmptyRoot(
+	const lwl_Heap *	pHeap,
+	lwl_HeapNode *		pNode,
+	const lwl_HeapCmp * pCmp
+);
+
 /** ****************************************************************************
  *
  * \brief		Initialize a heap node.
@@ -323,10 +329,10 @@ inline lwl_HeapNode * lwl_heapPopFirst(
 
 	if (pRoot != pLastNode) {
 		/*
-		 * The node may now be in the wrong place. Move it towards the leaves
-		 * until the heap property is satisfied.
+		 * The root is now empty. Fill it and put the last node back into the
+		 * heap.
 		 */
-		lwl__heapMoveTowardsLeaves(pHeap, pLastNode, 0, pCmp);
+		lwl__heapMoveToEmptyRoot(pHeap, pLastNode, pCmp);
 	}
 
 	return pRoot;
