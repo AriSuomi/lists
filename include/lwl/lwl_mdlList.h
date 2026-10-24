@@ -67,7 +67,7 @@
 /**
  * Invalid list index value. Used for nodes not on the list.
  */
-#define LWL__READYLIST_INVALID_IDX 255U
+#define LWL__MDLLIST_INVALID_IDX 255U
 
 /*******************************************************************************
 ;
@@ -104,7 +104,7 @@ inline void lwl_mdlListNodeInit(
 	lwl__portAssert(pNode != NULL);
 
 	lwl_dlListNodeInit(&pNode->dlListNode);
-	pNode->listIdx = LWL__READYLIST_INVALID_IDX;
+	pNode->listIdx = LWL__MDLLIST_INVALID_IDX;
 }
 
 /** ****************************************************************************
@@ -232,7 +232,7 @@ inline bool lwl_mdlListRemove(
 ) {
 	lwl__portAssert(pMdlList != NULL);
 	lwl__portAssert(pNode != NULL);
-	lwl__portAssert(pNode->listIdx != LWL__READYLIST_INVALID_IDX);
+	lwl__portAssert(pNode->listIdx != LWL__MDLLIST_INVALID_IDX);
 
 	bool wasRemoved = lwl_dlListRemove(&pNode->dlListNode);
 
@@ -248,7 +248,7 @@ inline bool lwl_mdlListRemove(
 			pMdlList->listMap &= (uint16_t)(~(1U << listIdx));
 		}
 
-		pNode->listIdx = LWL__READYLIST_INVALID_IDX;
+		pNode->listIdx = LWL__MDLLIST_INVALID_IDX;
 	}
 
 	return wasRemoved;
