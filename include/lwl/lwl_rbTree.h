@@ -154,13 +154,12 @@ typedef struct {
 ;
 ;-----------------------------------------------------------------------------*/
 
-void lwl_rbTreeInsertNode(
-	lwl_RbTree *		  pTree,
-	lwl_RbTreeNode *	  pNewNode,
-	const lwl_RbTreeCmp * pCmp
+void lwl_rbTreeRemoveNode(
+	lwl_RbTree *	 pTree,
+	lwl_RbTreeNode * pNode
 );
 
-void lwl_rbTreeRemoveNode(
+void lwl__rbTreeInsertFixup(
 	lwl_RbTree *	 pTree,
 	lwl_RbTreeNode * pNode
 );
@@ -425,6 +424,90 @@ inline void lwl_rbTreeSetRootPtr(
 	lwl__portAssert(pTree->root == NULL);
 
 	pTree->root = pNode;
+}
+
+/** ****************************************************************************
+ *
+ * \brief		Link a new node into the tree as a red leaf.
+ *
+ * \param[in]	pTree		Pointer to tree.
+ * \param[in]	pParent		Pointer to the parent node, or NULL if the tree is
+ * 							empty.
+ * \param[in]	pNewNode	Pointer to node that should be inserted.
+ * \param[in]	dir			Which child of the parent the new node becomes.
+ *
+ * \note		This function is intended for internal tree usage only. It
+ * 				should not be called from other code.
+ *
+ ******************************************************************************/
+inline void lwl__rbTreeLinkNewNode(
+	lwl_RbTree *	 pTree,
+	lwl_RbTreeNode * pParent,
+	lwl_RbTreeNode * pNewNode,
+	lwl__RbNodeDir	 dir
+) {
+	pNewNode->children[LWL__RBDIR_LEFT] = NULL;
+	pNewNode->children[LWL__RBDIR_RIGHT] = NULL;
+	lwl__rbNodeSetParentColor(pNewNode, pParent, LWL__RBCOLOR_RED);
+
+	if (pParent == NULL) {
+		pTree->root = pNewNode;
+	} else {
+		pParent->children[dir] = pNewNode;
+	}
+
+	/*
+	 * The new node is the first node only if it was added as the left child of
+	 * the previous first node. This also covers an empty tree, where both the
+	 * parent and the previous first node are NULL.
+	 */
+	if ((pParent == pTree->pLeftmost) && (dir == LWL__RBDIR_LEFT)) {
+		pTree->pLeftmost = pNewNode;
+	}
+}
+
+/** ****************************************************************************
+ *
+ * \brief		Insert the supplied node to the tree.
+ *
+ * \param[in]	pTree		Pointer to tree.
+ * \param[in]	pNewNode	Pointer to node that should be inserted.
+ * \param[in]	pCmp		Pointer to node compare information.
+ *
+ ******************************************************************************/
+inline void lwl_rbTreeInsertNode(
+	lwl_RbTree *		  pTree,
+	lwl_RbTreeNode *	  pNewNode,
+	const lwl_RbTreeCmp * pCmp
+) {
+	lwl__portAssert(pTree != NULL);
+	lwl__portAssert(pNewNode != NULL);
+	lwl__portAssert(lwl_rbNodeIsInTree(pNewNode) == false);
+	lwl__portAssert(pCmp != NULL);
+
+	lwl_RbTreeNode * pParent = NULL;
+	lwl__RbNodeDir	 dir = LWL__RBDIR_LEFT;
+
+	/*
+	 * Copied to locals since the compiler must otherwise reload them after
+	 * every call, as the compare function could modify *pCmp.
+	 */
+	lwl_RbTreeCmpFn * pCmpFn = pCmp->pCmpFn;
+	const void *	  pCmpParam = pCmp->pCmpParam;
+
+	lwl_RbTreeNode * pTreeNode = pTree->root;
+	while (pTreeNode != NULL) {
+		pParent = pTreeNode;
+
+		dir = pCmpFn(pTreeNode, pNewNode, pCmpParam)
+			? LWL__RBDIR_RIGHT
+			: LWL__RBDIR_LEFT;
+
+		pTreeNode = pTreeNode->children[dir];
+	}
+
+	lwl__rbTreeLinkNewNode(pTree, pParent, pNewNode, dir);
+	lwl__rbTreeInsertFixup(pTree, pNewNode);
 }
 
 #endif /* LWL_RBTREE_H_INCLUDED */
