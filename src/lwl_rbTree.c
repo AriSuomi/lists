@@ -284,7 +284,16 @@ void lwl_rbTreeRemoveNode(
 	}
 
 	if (originalColor == LWL__RBCOLOR_BLACK) {
-		lwl__rbTreeRemoveFixup(pTree, pFixupNode, pFixupParent);
+		if (lwl__rbNodeIsRed(pFixupNode)) {
+			/*
+			 * The red node that took the place of the removed black node only
+			 * needs to be painted black. This is the common case, so it is
+			 * handled here without calling the fixup function.
+			 */
+			lwl__rbNodeSetColor(pFixupNode, LWL__RBCOLOR_BLACK);
+		} else {
+			lwl__rbTreeRemoveFixup(pTree, pFixupNode, pFixupParent);
+		}
 	}
 
 	// Mark the node as not being in a tree
