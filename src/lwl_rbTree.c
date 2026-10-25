@@ -171,13 +171,6 @@ extern inline void lwl_rbTreeSetRootPtr(
 	lwl_RbTreeNode * pNode
 );
 
-extern inline void lwl__rbTreeLinkNewNode(
-	lwl_RbTree *	 pTree,
-	lwl_RbTreeNode * pParent,
-	lwl_RbTreeNode * pNewNode,
-	lwl__RbNodeDir	 dir
-);
-
 extern inline void lwl_rbTreeInsertNode(
 	lwl_RbTree *		  pTree,
 	lwl_RbTreeNode *	  pNewNode,
@@ -397,7 +390,9 @@ static lwl__RbNodeDir lwl__rbTreeGetNodeDir(
  * \param[in]	pTree		Pointer to the tree.
  * \param[in]	pNode		The new inserted node.
  *
- * \details
+ * \details		lwl_rbTreeInsertNode() calls this only when the parent of the
+ * 				new node is red. The other cases need no fixup and are handled
+ * 				there without a call.
  *
  * \note
  *

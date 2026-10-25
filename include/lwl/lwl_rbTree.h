@@ -428,51 +428,16 @@ inline void lwl_rbTreeSetRootPtr(
 
 /** ****************************************************************************
  *
- * \brief		Link a new node into the tree as a red leaf.
- *
- * \param[in]	pTree		Pointer to tree.
- * \param[in]	pParent		Pointer to the parent node, or NULL if the tree is
- * 							empty.
- * \param[in]	pNewNode	Pointer to node that should be inserted.
- * \param[in]	dir			Which child of the parent the new node becomes.
- *
- * \note		This function is intended for internal tree usage only. It
- * 				should not be called from other code.
- *
- ******************************************************************************/
-inline void lwl__rbTreeLinkNewNode(
-	lwl_RbTree *	 pTree,
-	lwl_RbTreeNode * pParent,
-	lwl_RbTreeNode * pNewNode,
-	lwl__RbNodeDir	 dir
-) {
-	pNewNode->children[LWL__RBDIR_LEFT] = NULL;
-	pNewNode->children[LWL__RBDIR_RIGHT] = NULL;
-	lwl__rbNodeSetParentColor(pNewNode, pParent, LWL__RBCOLOR_RED);
-
-	if (pParent == NULL) {
-		pTree->root = pNewNode;
-	} else {
-		pParent->children[dir] = pNewNode;
-	}
-
-	/*
-	 * The new node is the first node only if it was added as the left child of
-	 * the previous first node. This also covers an empty tree, where both the
-	 * parent and the previous first node are NULL.
-	 */
-	if ((pParent == pTree->pLeftmost) && (dir == LWL__RBDIR_LEFT)) {
-		pTree->pLeftmost = pNewNode;
-	}
-}
-
-/** ****************************************************************************
- *
  * \brief		Insert the supplied node to the tree.
  *
  * \param[in]	pTree		Pointer to tree.
  * \param[in]	pNewNode	Pointer to node that should be inserted.
  * \param[in]	pCmp		Pointer to node compare information.
+ *
+ * \details		This is an inline function so that the search loop, and with it
+ * 				the compare function, can be inlined into the caller. The node
+ * 				is linked here and not in a helper function, because helpers
+ * 				are not inlined with -Os and would cost an extra call.
  *
  ******************************************************************************/
 inline void lwl_rbTreeInsertNode(
@@ -506,8 +471,38 @@ inline void lwl_rbTreeInsertNode(
 		pTreeNode = pTreeNode->children[dir];
 	}
 
-	lwl__rbTreeLinkNewNode(pTree, pParent, pNewNode, dir);
-	lwl__rbTreeInsertFixup(pTree, pNewNode);
+	/*
+	 * Link the new node into the tree as a red leaf.
+	 */
+	pNewNode->children[LWL__RBDIR_LEFT] = NULL;
+	pNewNode->children[LWL__RBDIR_RIGHT] = NULL;
+	lwl__rbNodeSetParentColor(pNewNode, pParent, LWL__RBCOLOR_RED);
+
+	if (pParent == NULL) {
+		pTree->root = pNewNode;
+	} else {
+		pParent->children[dir] = pNewNode;
+	}
+
+	/*
+	 * The new node is the first node only if it was added as the left child of
+	 * the previous first node. This also covers an empty tree, where both the
+	 * parent and the previous first node are NULL.
+	 */
+	if ((pParent == pTree->pLeftmost) && (dir == LWL__RBDIR_LEFT)) {
+		pTree->pLeftmost = pNewNode;
+	}
+
+	/*
+	 * Most new nodes need no fixup: the first node only becomes the black
+	 * root, and a node with a black parent breaks no rule. Checking this here
+	 * avoids calling the fixup function in the common case.
+	 */
+	if (pParent == NULL) {
+		lwl__rbNodeSetColor(pNewNode, LWL__RBCOLOR_BLACK);
+	} else if (lwl__rbNodeGetColor(pParent) == LWL__RBCOLOR_RED) {
+		lwl__rbTreeInsertFixup(pTree, pNewNode);
+	}
 }
 
 #endif /* LWL_RBTREE_H_INCLUDED */
