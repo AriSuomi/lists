@@ -87,10 +87,6 @@
 ;
 ;-----------------------------------------------------------------------------*/
 
-lwl_MdlListNode * lwl_mdlListPeekFirst(
-	const lwl_MdlList * pMdlList
-);
-
 /** ****************************************************************************
  *
  * 	\brief		Initialize list node.
@@ -256,6 +252,35 @@ inline bool lwl_mdlListRemove(
 
 /** ****************************************************************************
  *
+ * 	\brief		Peek at the first node.
+ *
+ * 	\param[in]	pMdlList	Pointer to a list.
+ *
+ * 	\return		Pointer to the first node.
+ *
+ ******************************************************************************/
+static inline lwl_MdlListNode * lwl_mdlListPeekFirst(
+	const lwl_MdlList * pMdlList
+) {
+	lwl__portAssert(pMdlList != NULL);
+
+	lwl_MdlListNode * pFirst = NULL;
+
+	uint16_t listMap = pMdlList->listMap;
+	if (listMap != 0U) {
+		uint_fast8_t listIdx =
+			((sizeof(listMap) * CHAR_BIT) - 1U) - lwl__portClz16(listMap);
+
+		pFirst = (lwl_MdlListNode *)lwl_dlListPeekFirst(
+			&pMdlList->pLists[listIdx]
+		);
+	}
+
+	return pFirst;
+}
+
+/** ****************************************************************************
+ *
  * 	\brief		Pop the first node.
  *
  * 	\param[in]	pMdlList		Pointer to a list.
@@ -263,7 +288,7 @@ inline bool lwl_mdlListRemove(
  * 	\return		Pointer to the popped node. NULL if the list was empty.
  *
  ******************************************************************************/
-inline lwl_MdlListNode * lwl_mdlListPopFirst(
+static inline lwl_MdlListNode * lwl_mdlListPopFirst(
 	lwl_MdlList * pMdlList
 ) {
 	lwl__portAssert(pMdlList != NULL);

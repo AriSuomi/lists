@@ -60,8 +60,6 @@
 ;
 ;-----------------------------------------------------------------------------*/
 
-#define LWL__MDLLIST_BITSPERBYTE 8U
-
 /*******************************************************************************
 ;
 ;	T Y P E S
@@ -101,10 +99,6 @@ extern inline bool lwl_mdlListRemove(
 	lwl_MdlListNode * pNode
 );
 
-extern inline lwl_MdlListNode * lwl_mdlListPopFirst(
-	lwl_MdlList * pMdlList
-);
-
 extern inline void lwl_mdlListStorePtr(
 	lwl_MdlList *	  pMdlList,
 	lwl_MdlListNode * pNew
@@ -129,33 +123,3 @@ extern inline bool lwl_mdlListIsNodeInList(
 ;	F U N C T I O N   D E F I N I T I O N S
 ;
 ;-----------------------------------------------------------------------------*/
-
-/** ****************************************************************************
- *
- * 	\brief		Peek at the first node.
- *
- * 	\param[in]	pMdlList	Pointer to a list.
- *
- * 	\return		Pointer to the first node.
- *
- ******************************************************************************/
-lwl_MdlListNode * lwl_mdlListPeekFirst(
-	const lwl_MdlList * pMdlList
-) {
-	lwl__portAssert(pMdlList != NULL);
-
-	lwl_MdlListNode * pFirst = NULL;
-
-	uint16_t listMap = pMdlList->listMap;
-	if (listMap != 0U) {
-		uint_fast8_t listIdx =
-			((sizeof(listMap) * LWL__MDLLIST_BITSPERBYTE) - 1U) -
-			lwl__portClz16(listMap);
-
-		pFirst = (lwl_MdlListNode *)lwl_dlListPeekFirst(
-			&pMdlList->pLists[listIdx]
-		);
-	}
-
-	return pFirst;
-}
