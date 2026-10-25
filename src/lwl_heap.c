@@ -96,6 +96,7 @@ extern inline void lwl_heapInit(
 );
 
 extern inline bool lwl_heapIsNodeInHeap(
+	const lwl_Heap *	 pHeap,
 	const lwl_HeapNode * pNode
 );
 
@@ -156,7 +157,8 @@ bool lwl_heapInsert(
 	lwl_HeapNode *		pNew,
 	const lwl_HeapCmp * pCmp
 ) {
-	bool okToInsert = !lwl_heapIsNodeInHeap(pNew);
+	/* A node in any heap, not only in this one, must not be inserted */
+	bool okToInsert = (pNew->heapIdx == LWL__HEAP_INV_IDX);
 
 	if (pHeap->nodeCount == pHeap->arraySize) {
 		/*
@@ -203,7 +205,7 @@ bool lwl_heapRemove(
 		return false;
 	}
 
-	bool isInHeap = lwl_heapIsNodeInHeap(pHeapNode);
+	bool isInHeap = lwl_heapIsNodeInHeap(pHeap, pHeapNode);
 	if (!isInHeap) {
 		return false;
 	}

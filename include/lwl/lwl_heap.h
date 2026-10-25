@@ -205,18 +205,28 @@ inline void lwl_heapInit(
 
 /** ****************************************************************************
  *
- * \brief		Check if the supplied node is in a heap.
+ * \brief		Check if the supplied node is in the supplied heap.
  *
+ * \param[in]	pHeap		Pointer to the heap.
  * \param[in]	pNode		Pointer to the node to check.
  *
- * \retval		true		The node is in a heap.
- * \retval		false		The node is not in a heap.
+ * \retval		true		The node is in the heap.
+ * \retval		false		The node is not in the heap. It may be in another
+ * 							heap.
  *
  ******************************************************************************/
 inline bool lwl_heapIsNodeInHeap(
+	const lwl_Heap *	 pHeap,
 	const lwl_HeapNode * pNode
 ) {
-	return pNode->heapIdx != LWL__HEAP_INV_IDX;
+	/*
+	 * A node that is not in any heap has an invalid index, which is never
+	 * below the node count. Checking the index against the node count first
+	 * also keeps the array access inside this heap.
+	 */
+	lwl_HeapIdx heapIdx = pNode->heapIdx;
+
+	return (heapIdx < pHeap->nodeCount) && (pHeap->pElements[heapIdx] == pNode);
 }
 
 /** ****************************************************************************
@@ -239,11 +249,7 @@ inline bool lwl_heapMoveNode(
 	lwl_HeapNode *		pHeapNode,
 	const lwl_HeapCmp * pCmp
 ) {
-	bool okToMove = lwl_heapIsNodeInHeap(pHeapNode);
-
-	if (pHeap->nodeCount == 0U) {
-		okToMove = false;
-	}
+	bool okToMove = lwl_heapIsNodeInHeap(pHeap, pHeapNode);
 
 	if (okToMove) {
 		lwl__heapMoveInternal(pHeap, pHeapNode, pHeapNode->heapIdx, pCmp);
