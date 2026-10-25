@@ -136,13 +136,6 @@ bool lwl_dlListMoveNode(
 	const lwl_DlListCmp * pCmp
 );
 
-void lwl__dlListInsertBack(
-	lwl_DlList *		  pList,
-	lwl_DlListNode *	  pListNode,
-	lwl_DlListNode *	  pNewNode,
-	const lwl_DlListCmp * pCmp
-);
-
 /** ****************************************************************************
  *
  * 	\brief		Initialize list node.
@@ -494,6 +487,43 @@ inline lwl_DlListNode * lwl_dlListPeekNext(
 	}
 
 	return pNext;
+}
+
+/** ****************************************************************************
+ *
+ * \brief	Insert node to the correct spot after the specified node.
+ *
+ * \param	pList		Pointer to the list.
+ * \param	pListNode	Pointer to node on the list. The search for the correct
+ * 						insertion spot will start from this node.
+ * \param	pNewNode	The new node that should be inserted.
+ * \param	pCmp		Pointer to comparison information.
+ *
+ ******************************************************************************/
+inline void lwl__dlListInsertBack(
+	lwl_DlList *		  pList,
+	lwl_DlListNode *	  pListNode,
+	lwl_DlListNode *	  pNewNode,
+	const lwl_DlListCmp * pCmp
+) {
+	lwl_DlListCmpFn * pCmpFn = pCmp->pCmpFn;
+	const void *	  pCmpParam = pCmp->pCmpParam;
+
+	/*
+	 * Traverse the list until the right insertion spot is found.
+	 */
+	while (pListNode != &pList->sentinel) {
+		bool notFound = pCmpFn(pListNode, pNewNode, pCmpParam);
+
+		if (!notFound) {
+			/* Found the spot. The new node should be before this list node. */
+			break;
+		}
+
+		pListNode = pListNode->pNext;
+	}
+
+	lwl_dlListInsertBefore(pListNode, pNewNode);
 }
 
 /** ****************************************************************************

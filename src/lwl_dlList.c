@@ -145,6 +145,13 @@ extern inline lwl_DlListNode * lwl_dlListPeekNext(
 	const lwl_DlListNode * pNode
 );
 
+extern inline void lwl__dlListInsertBack(
+	lwl_DlList *		  pList,
+	lwl_DlListNode *	  pListNode,
+	lwl_DlListNode *	  pNewNode,
+	const lwl_DlListCmp * pCmp
+);
+
 extern inline bool lwl_dlListInsert(
 	lwl_DlList *		  pList,
 	lwl_DlListNode *	  pNewNode,
@@ -218,40 +225,6 @@ bool lwl_dlListMoveNode(
 	}
 
 	return success;
-}
-
-/** ****************************************************************************
- *
- * \brief	Insert node to the correct spot after the specified node.
- *
- * \param	pList		Pointer to the heap.
- * \param	pListNode	Pointer to node on the list. The search for the correct
- * 						insertion spot will start from this node.
- * \param	pNewNode	The new node that should be inserte.
- * \param	pCmp		Pointer to comparison information.
- *
- ******************************************************************************/
-void lwl__dlListInsertBack(
-	lwl_DlList *		  pList,
-	lwl_DlListNode *	  pListNode,
-	lwl_DlListNode *	  pNewNode,
-	const lwl_DlListCmp * pCmp
-) {
-	/*
-	 * Traverse the list until the right insertion spot is found.
-	 */
-	while (pListNode != &pList->sentinel) {
-		bool notFound = pCmp->pCmpFn(pListNode, pNewNode, pCmp->pCmpParam);
-
-		if (!notFound) {
-			/* Found the spot. The new node should be before this list node. */
-			break;
-		}
-
-		pListNode = pListNode->pNext;
-	}
-
-	lwl_dlListInsertBefore(pListNode, pNewNode);
 }
 
 /** ****************************************************************************
