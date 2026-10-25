@@ -244,11 +244,14 @@ static void lwl__dlListInsertFront(
 	lwl_DlListNode *	  pNewNode,
 	const lwl_DlListCmp * pCmp
 ) {
+	lwl_DlListCmpFn * pCmpFn = pCmp->pCmpFn;
+	const void *	  pCmpParam = pCmp->pCmpParam;
+
 	/*
 	 * Traverse the list until the right insertion spot is found.
 	 */
 	while (pListNode != &pList->sentinel) {
-		bool foundSpot = pCmp->pCmpFn(pListNode, pNewNode, pCmp->pCmpParam);
+		bool foundSpot = pCmpFn(pListNode, pNewNode, pCmpParam);
 
 		if (foundSpot) {
 			break;
