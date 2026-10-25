@@ -116,6 +116,12 @@ extern inline lwl_SlListNode * lwl_slListPopFirst(
 	lwl_SlList * pList
 );
 
+extern inline bool lwl_slListInsert(
+	lwl_SlList *		  pList,
+	lwl_SlListNode *	  pNewNode,
+	const lwl_SlListCmp * pCmp
+);
+
 /*******************************************************************************
 ;
 ;	D A T A
@@ -127,70 +133,6 @@ extern inline lwl_SlListNode * lwl_slListPopFirst(
 ;	F U N C T I O N   D E F I N I T I O N S
 ;
 ;-----------------------------------------------------------------------------*/
-
-/** ****************************************************************************
- *
- * \brief		Insert the supplied node to the list.
- *
- * \param[in]	pList		Pointer to list.
- * \param[in]	pNew		Pointer to node that should be pushed.
- * \param[in]	pCmp		Pointer to node comparison information.
- *
- * \retval		true		The Node was inserted successfully.
- * \retval		false		The node could not be inserted.
- *
- ******************************************************************************/
-bool lwl_slListInsert(
-	lwl_SlList *		  pList,
-	lwl_SlListNode *	  pNewNode,
-	const lwl_SlListCmp * pCmp
-) {
-	bool wasInserted = false;
-
-	lwl__portAssert(pList != NULL);
-	lwl__portAssert(pNewNode != NULL);
-
-	bool isInList = lwl_slListIsNodeInList(pNewNode);
-
-	if (!isInList) {
-		/*
-		 * The node is not yet in the list. Iterate the list until the correct
-		 * spot is found.
-		 */
-
-		lwl_SlListNode * pPrevListNode = &pList->sentinel;
-		lwl_SlListNode * pListNode = pPrevListNode->pNext;
-
-		while (pListNode != &pList->sentinel) {
-			bool notFound = pCmp->pCmpFn(pListNode, pNewNode, pCmp->pCmpParam);
-
-			if (!notFound) {
-				/* Found the spot. The new node should be before this list node. */
-				break;
-			}
-
-			pPrevListNode = pListNode;
-			pListNode = pListNode->pNext;
-		}
-
-		/*
-		 * Insert the new node into the list.
-		 */
-		pNewNode->pNext = pListNode;
-
-		if (pListNode == &pList->sentinel) {
-			/*
-			 * The node is inserted as the last node.
-			 */
-			pList->pLast = pNewNode;
-		}
-
-		pPrevListNode->pNext = pNewNode;
-		wasInserted = true;
-	}
-
-	return wasInserted;
-}
 
 /** ****************************************************************************
  *

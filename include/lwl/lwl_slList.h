@@ -131,12 +131,6 @@ typedef struct {
 ;
 ;-----------------------------------------------------------------------------*/
 
-bool lwl_slListInsert(
-	lwl_SlList *		  pList,
-	lwl_SlListNode *	  pNew,
-	const lwl_SlListCmp * pCmp
-);
-
 bool lwl_slListRemove(
 	lwl_SlList *	 pList,
 	lwl_SlListNode * pNode
@@ -322,6 +316,71 @@ inline lwl_SlListNode * lwl_slListPopFirst(
 	}
 
 	return pNode;
+}
+
+/** ****************************************************************************
+ *
+ * \brief		Insert the supplied node to the list.
+ *
+ * \param[in]	pList		Pointer to list.
+ * \param[in]	pNewNode	Pointer to node that should be inserted.
+ * \param[in]	pCmp		Pointer to node comparison information.
+ *
+ * \retval		true		The Node was inserted successfully.
+ * \retval		false		The node could not be inserted.
+ *
+ ******************************************************************************/
+inline bool lwl_slListInsert(
+	lwl_SlList *		  pList,
+	lwl_SlListNode *	  pNewNode,
+	const lwl_SlListCmp * pCmp
+) {
+	bool wasInserted = false;
+
+	lwl__portAssert(pList != NULL);
+	lwl__portAssert(pNewNode != NULL);
+
+	bool isInList = lwl_slListIsNodeInList(pNewNode);
+
+	if (!isInList) {
+		/*
+		 * The node is not yet in the list. Iterate the list until the correct
+		 * spot is found.
+		 */
+		lwl_SlListCmpFn * pCmpFn = pCmp->pCmpFn;
+		const void *	  pCmpParam = pCmp->pCmpParam;
+		lwl_SlListNode *  pPrevListNode = &pList->sentinel;
+		lwl_SlListNode *  pListNode = pPrevListNode->pNext;
+
+		while (pListNode != &pList->sentinel) {
+			bool notFound = pCmpFn(pListNode, pNewNode, pCmpParam);
+
+			if (!notFound) {
+				/* Found the spot. The new node should be before this list node. */
+				break;
+			}
+
+			pPrevListNode = pListNode;
+			pListNode = pListNode->pNext;
+		}
+
+		/*
+		 * Insert the new node into the list.
+		 */
+		pNewNode->pNext = pListNode;
+
+		if (pListNode == &pList->sentinel) {
+			/*
+			 * The node is inserted as the last node.
+			 */
+			pList->pLast = pNewNode;
+		}
+
+		pPrevListNode->pNext = pNewNode;
+		wasInserted = true;
+	}
+
+	return wasInserted;
 }
 
 #endif // LWL_SLLIST_H_INCLUDED
