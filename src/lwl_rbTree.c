@@ -522,7 +522,13 @@ static void lwl__rbTreeRemoveFixup(
 		lwl_RbTreeNode * pSibling =
 			pParent->children[LWL__RBDIR_RIGHT - nodeDir];
 
-		if (lwl__rbNodeIsRed(pSibling)) {
+		lwl__portAssert(pSibling != NULL);
+
+		/*
+		 * Not lwl__rbNodeIsRed(), since its NULL check would make the compiler
+		 * assume that the sibling may be NULL (-Wnull-dereference).
+		 */
+		if (lwl__rbNodeGetColor(pSibling) == LWL__RBCOLOR_RED) {
 			// Case 1: Sibling is LWL__RBCOLOR_RED
 			lwl__rbNodeSetColor(pSibling, LWL__RBCOLOR_BLACK);
 			lwl__rbNodeSetColor(pParent, LWL__RBCOLOR_RED);
