@@ -259,8 +259,11 @@ bool lwl_ptrHeapRemove(
 		 * Cut the last node from the heap by clearing the pointer to it.
 		 */
 		lwl_PtrHeapNode *  pLastParent;
-		lwl_PtrHeapNode ** ppLastSlot = lwl__ptrHeapGetLastSlot(pHeap, &pLastParent);
-		lwl_PtrHeapNode *  pLastNode = *ppLastSlot;
+		lwl_PtrHeapNode ** ppLastSlot = lwl__ptrHeapGetLastSlot(
+			pHeap,
+			&pLastParent
+		);
+		lwl_PtrHeapNode * pLastNode = *ppLastSlot;
 		*ppLastSlot = NULL;
 
 		if (pLastNode != pNode) {

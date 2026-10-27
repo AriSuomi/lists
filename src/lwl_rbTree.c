@@ -101,9 +101,9 @@ static void lwl__rbTreeRotate(
 );
 
 static void lwl__rbTreeGraftNode(
-	lwl_RbTree *	 pTree,
-	lwl_RbTreeNode * pOldBranch,
-	lwl_RbTreeNode * pScion
+	lwl_RbTree *		   pTree,
+	const lwl_RbTreeNode * pOldBranch,
+	lwl_RbTreeNode *	   pScion
 );
 
 static void lwl__rbTreeRemoveFixup(
@@ -469,9 +469,9 @@ void lwl__rbTreeInsertFixup(
  *
  ******************************************************************************/
 static void lwl__rbTreeGraftNode(
-	lwl_RbTree *	 pTree,
-	lwl_RbTreeNode * pOldBranch,
-	lwl_RbTreeNode * pScion
+	lwl_RbTree *		   pTree,
+	const lwl_RbTreeNode * pOldBranch,
+	lwl_RbTreeNode *	   pScion
 ) {
 	lwl_RbTreeNode * pRootstock = lwl__rbNodeGetParent(pOldBranch);
 

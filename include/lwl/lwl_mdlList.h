@@ -193,9 +193,13 @@ inline bool lwl_mdlListInsert(
  ******************************************************************************/
 inline void lwl_mdlListStorePtr(
 	lwl_MdlList *	  pMdlList,
-	lwl_MdlListNode * pNew
+	lwl_MdlListNode * pNode
 ) {
-	lwl_dlListSneekLast(&pMdlList->pLists[0], &pNew->dlListNode);
+	lwl_DlListNode * pDlNode = (pNode == NULL)
+		? &pMdlList->pLists[0].sentinel
+		: &pNode->dlListNode;
+
+	lwl_dlListSneekLast(&pMdlList->pLists[0], pDlNode);
 }
 
 /** ****************************************************************************

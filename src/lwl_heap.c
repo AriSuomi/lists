@@ -120,8 +120,12 @@ extern inline lwl_HeapNode * lwl_heapPopFirst(
 );
 
 extern inline void lwl_heapSetRootNode(
-	lwl_Heap *	   pHeap,
-	lwl_HeapNode * pNode
+	const lwl_Heap * pHeap,
+	lwl_HeapNode *	 pNode
+);
+
+extern inline lwl_HeapNode * lwl_heapGetRootNode(
+	const lwl_Heap * pHeap
 );
 
 /*******************************************************************************
@@ -197,7 +201,7 @@ bool lwl_heapInsert(
  ******************************************************************************/
 bool lwl_heapRemove(
 	lwl_Heap *			pHeap,
-	lwl_HeapNode *		pHeapNode,
+	lwl_HeapNode *		pNode,
 	const lwl_HeapCmp * pCmp
 ) {
 	lwl__portAssert(pHeap != NULL);
@@ -206,16 +210,16 @@ bool lwl_heapRemove(
 		return false;
 	}
 
-	bool isInHeap = lwl_heapIsNodeInHeap(pHeap, pHeapNode);
+	bool isInHeap = lwl_heapIsNodeInHeap(pHeap, pNode);
 	if (!isInHeap) {
 		return false;
 	}
 
 	lwl_HeapNode * pLastNode = lwl__heapRemoveLastNode(pHeap);
-	uint_fast16_t  heapIdx = pHeapNode->heapIdx;
-	pHeapNode->heapIdx = LWL__HEAP_INV_IDX;
+	uint_fast16_t  heapIdx = pNode->heapIdx;
+	pNode->heapIdx = LWL__HEAP_INV_IDX;
 
-	if (pLastNode != pHeapNode) {
+	if (pLastNode != pNode) {
 		/*
 		 * The node may now be in the wrong place. Move it towards the leaves or
 		 * root until the heap property is satisfied.

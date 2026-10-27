@@ -362,10 +362,28 @@ inline lwl_HeapNode * lwl_heapPopFirst(
  *
  ******************************************************************************/
 inline void lwl_heapSetRootNode(
-	lwl_Heap *	   pHeap,
-	lwl_HeapNode * pNode
+	const lwl_Heap * pHeap,
+	lwl_HeapNode *	 pNode
 ) {
 	pHeap->pElements[0] = pNode;
+}
+
+/** ****************************************************************************
+ *
+ * \brief		Get the root node.
+ *
+ * \param[in] 	pHeap		Pointer to a heap.
+ *
+ * \return		Pointer to the root node.
+ *
+ * \details		Returns the stored root node. This function should only be used
+ * 				to read the pointer stored with lwl_heapSetRootNode().
+ *
+ ******************************************************************************/
+inline lwl_HeapNode * lwl_heapGetRootNode(
+	const lwl_Heap * pHeap
+) {
+	return pHeap->pElements[0];
 }
 
 #endif /* LWL_HEAP_H_INCLUDED */

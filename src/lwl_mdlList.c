@@ -101,7 +101,7 @@ extern inline bool lwl_mdlListRemove(
 
 extern inline void lwl_mdlListStorePtr(
 	lwl_MdlList *	  pMdlList,
-	lwl_MdlListNode * pNew
+	lwl_MdlListNode * pNode
 );
 
 extern inline lwl_MdlListNode * lwl_mdlListGetStoredPtr(
