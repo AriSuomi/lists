@@ -138,12 +138,12 @@ extern inline bool lwl_slListInsert(
  *
  * \brief		Remove a node from the list.
  *
- * \param[in]	pList	Pointer to a list.
- * \param[in]	pNode	Pointer to node that should be removed.
+ * \param		pList		Pointer to a list.
+ * \param		pNode		Pointer to node that should be removed.
  *
- * \retval		true	The Node was removed successfully.
- * \retval		false	The node could not be removed. It was not in any list or
- * 						it was not in the supplied list.
+ * \retval		true		The Node was removed successfully.
+ * \retval		false		The node could not be removed. It was not in any
+ * 							list or it was not in the supplied list.
  *
  ******************************************************************************/
 bool lwl_slListRemove(

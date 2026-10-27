@@ -174,9 +174,9 @@ extern inline bool lwl_dlListInsert(
  *
  * \brief	Update node position in the list.
  *
- * \param	pList		Pointer to the heap.
+ * \param	pList		Pointer to the list.
  * \param	pNode		The node that should be moved.
- * \param	pCmp		Poninter to comparison information.
+ * \param	pCmp		Pointer to comparison information.
  *
  * \retval	true		The node position was updated.
  * \retval	false		Could not update node position.
@@ -231,10 +231,10 @@ bool lwl_dlListMoveNode(
  *
  * \brief	Insert node to the correct spot before the specified node.
  *
- * \param	pList		Pointer to the heap.
+ * \param	pList		Pointer to the list.
  * \param	pListNode	Pointer to node on the list. The search for the correct
  * 						insertion spot will start from this node.
- * \param	pNewNode	The new node that should be inserte.
+ * \param	pNewNode	The new node that should be inserted.
  * \param	pCmp		Pointer to comparison information.
  *
  ******************************************************************************/

@@ -193,8 +193,8 @@ extern inline void lwl_rbTreeInsertNode(
  *
  * \brief		Remove a node from the tree.
  *
- * \param[in]	pTree		Pointer to the tree.
- * \param[in]	pNode		Pointer to node that should be removed from the
+ * \param		pTree		Pointer to the tree.
+ * \param		pNode		Pointer to node that should be removed from the
  * 							tree.
  *
  ******************************************************************************/
@@ -313,13 +313,11 @@ static inline bool lwl__rbNodeIsRed(
  *
  * \brief		Perform a rotation around the specified node.
  *
- * \param[in]	pTree		Pointer to the tree.
- * \param[in]	pNode		The rotation should be done around this node.
- * \param[in]	direction	The rotation direction.
+ * \param		pTree		Pointer to the tree.
+ * \param		pNode		The rotation should be done around this node.
+ * \param		direction	The rotation direction.
  *
  * \details
- *
- * \note
  *
  ******************************************************************************/
 static void lwl__rbTreeRotate(
@@ -387,14 +385,12 @@ static lwl__RbNodeDir lwl__rbTreeGetNodeDir(
  *
  * \brief		Perform fixup after node insertion.
  *
- * \param[in]	pTree		Pointer to the tree.
- * \param[in]	pNode		The new inserted node.
+ * \param		pTree		Pointer to the tree.
+ * \param		pNode		The new inserted node.
  *
  * \details		lwl_rbTreeInsertNode() calls this only when the parent of the
  * 				new node is red. The other cases need no fixup and are handled
  * 				there without a call.
- *
- * \note
  *
  ******************************************************************************/
 void lwl__rbTreeInsertFixup(
@@ -463,9 +459,9 @@ void lwl__rbTreeInsertFixup(
  *
  * \brief		Graft a scion replacing an entire branch of the tree.
  *
- * \param[in]	pTree		Pointer to the tree.
+ * \param		pTree		Pointer to the tree.
  * \param[in]	pOldBranch	Pointer to the branch that should be replaced.
- * \param[in]	pScion		Pointer to the replacement branch. May be NULL if
+ * \param		pScion		Pointer to the replacement branch. May be NULL if
  * 							the old branch should just be removed from the tree.
  *
  * \details		The scion will replace the old branch of the tree. The scion may
@@ -496,9 +492,9 @@ static void lwl__rbTreeGraftNode(
  *
  * \brief		Perform fixup after node removal.
  *
- * \param[in]	pTree		Pointer to the tree.
- * \param[in]	pNode		The node to start the fixup from. May be NULL.
- * \param[in]	pParent		Pointer to the parent of pNode. NULL if pNode is
+ * \param		pTree		Pointer to the tree.
+ * \param		pNode		The node to start the fixup from. May be NULL.
+ * \param		pParent		Pointer to the parent of pNode. NULL if pNode is
  * 							the root node.
  *
  * \details		The parent is passed separately since pNode may be NULL, in

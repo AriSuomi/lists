@@ -169,10 +169,14 @@ inline bool lwl_ptrHeapIsNodeInHeap(
  *
  * \brief		Moves node position in heap.
  *
- * \param[in]	pHeap		Pointer to the heap.
- * \param[in]	pNode		Pointer to node that should be moved.
+ * \param		pHeap		Pointer to the heap.
+ * \param		pNode		Pointer to node that should be moved.
  * \param[in]	pCmp		Pointer to comparison information used to keep the
  * 							heap sorted in the correct order.
+ *
+ * \retval		true		The node was moved.
+ * \retval 		false		The node was not moved. The supplied node is not
+ * 							in any heap.
  *
  * \details		This function should be called if a node has been modified in a
  * 				way that may cause the comparison function to return a different
@@ -199,7 +203,7 @@ inline bool lwl_ptrHeapMoveNode(
  *
  * \param[in]	pHeap		Pointer to a heap.
  *
- * \return		Pointer to the first node.
+ * \return		Pointer to the first node. Returns NULL if the heap is empty.
  *
  * \details
  *
@@ -212,12 +216,12 @@ inline lwl_PtrHeapNode * lwl_ptrHeapPeekFirst(
 
 /** ****************************************************************************
  *
- * \brief		Pop node with highest key.
+ * \brief		Pops the first node of the heap.
  *
- * \param[in]	pHeap 		Pointer to a heap.
+ * \param		pHeap 		Pointer to a heap.
  * \param[in]	pCmp		Pointer to node comparison information.
  *
- * \return		Pointer to the popped node. NULL if the tree was empty.
+ * \return		Pointer to the popped node. NULL if the heap was empty.
  *
  * \details
  *
@@ -241,7 +245,7 @@ inline lwl_PtrHeapNode * lwl_ptrHeapPopFirst(
  *
  * \brief		Initialize heap node.
  *
- * \param[in]	pNode	Pointer to the node.
+ * \param[out]	pNode		Pointer to the node.
  *
  * \details
  *
@@ -258,7 +262,7 @@ inline void lwl_ptrHeapNodeInit(
  *
  * \brief		Initialize heap.
  *
- * \param[in]	pHeap	Pointer to the heap.
+ * \param[out]	pHeap		Pointer to the heap.
  *
  * \details
  *
@@ -274,7 +278,7 @@ inline void lwl_ptrHeapInit(
  *
  * \brief		Store a node pointer to the root of the heap.
  *
- * \param[in]	pHeap		Pointer to a heap.
+ * \param		pHeap		Pointer to a heap.
  * \param[in]	pNode		Pointer to node that should be set as root node.
  *
  * \details

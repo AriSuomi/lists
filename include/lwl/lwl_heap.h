@@ -169,7 +169,7 @@ void lwl__heapMoveToEmptyRoot(
  *
  * \brief		Initialize a heap node.
  *
- * \param[in]	pNode		Pointer to the node.
+ * \param[out]	pNode		Pointer to the node.
  *
  * \details		Nodes must be initialized with this function before they are
  * 				inserted into a heap.
@@ -185,9 +185,9 @@ inline void lwl_heapNodeInit(
  *
  * \brief		Initialize a heap.
  *
- * \param[in]	pHeap			Pointer to the heap.
- * \param[in]	pHeapArray		Pointer to array with pointers to nodes.
- * \param[in]	arraySize		Number of elements in the array.
+ * \param[out]	pHeap			Pointer to the heap.
+ * \param		pHeapArray		Pointer to array with pointers to nodes.
+ * \param		arraySize		Number of elements in the array.
  *
  * \details		A heap must be initialized with this function before nodes
  * 				can be inserted.
@@ -234,11 +234,12 @@ inline bool lwl_heapIsNodeInHeap(
  * \brief		Move a node in the heap.
  *
  * \param[in]	pHeap		Pointer to the heap containing the node.
- * \param[in]	pHeapNode	Pointer to the node that should be moved.
+ * \param		pHeapNode	Pointer to the node that should be moved.
  * \param[in]	pCmp		Pointer to the node comparing information.
  *
  * \retval		true		The node was successfully moved.
- * \retval		false		Could not move the node. Maybe it isn't in a heap.
+ * \retval		false		Could not move the node. The heap does not contain
+ * 							the supplied node.
  *
  * \details		This function should be called if the node has changed in a way
  * 				that modifies the return value of the compare function.
@@ -264,7 +265,7 @@ inline bool lwl_heapMoveNode(
  *
  * \param[in]	pHeap		Pointer to the heap.
  *
- * \return		Pointer to the first node.
+ * \return		Pointer to the first node. Returns NULL if the heap is empty.
  *
  * \details		The first node is the root node. The order of the heap depends
  * 				on the comparing information supplied when inserting nodes.
@@ -282,7 +283,7 @@ inline lwl_HeapNode * lwl_heapPeekFirst(
  *
  * \brief		Remove the last node from the heap.
  *
- * \param[in]	pHeap 		Pointer to the heap.
+ * \param		pHeap 		Pointer to the heap.
  *
  * \return		Pointer to the removed node.
  *
@@ -311,7 +312,7 @@ inline lwl_HeapNode * lwl__heapRemoveLastNode(
  *
  * \brief		Pop the first node.
  *
- * \param[in]	pHeap 		Pointer to the heap.
+ * \param		pHeap 		Pointer to the heap.
  * \param[in]	pCmp		Pointer to node comparison information.
  *
  * \return		Pointer to the popped node. NULL if the heap was empty.
@@ -348,8 +349,8 @@ inline lwl_HeapNode * lwl_heapPopFirst(
  *
  * \brief		Set the root node.
  *
- * \param[in]	pHeap		Pointer to a heap.
- * \param[in]	pNode		Pointer to node that should be set as root node.
+ * \param 		pHeap		Pointer to a heap.
+ * \param 		pNode		Pointer to node that should be set as root node.
  *
  * \details		This function can be used to quickly store a node pointer
  * 				directly to the root of the heap. This is faster than

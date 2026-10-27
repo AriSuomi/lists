@@ -132,6 +132,8 @@ typedef struct {
  *
  * \details	Used for functions that determine the order of the tree. The second
  * 			node is always the new node when inserting nodes into the tree.
+ * 			This means that returning true for equal nodes causes the list to be
+ * 			first in first out.
  *
  ******************************************************************************/
 typedef bool lwl_RbTreeCmpFn(
@@ -207,7 +209,7 @@ inline lwl__RbNodeColor lwl__rbNodeGetColor(
  *
  * \brief		Set the parent of the supplied node. The color is not changed.
  *
- * \param[in]	pNode		Pointer to the node.
+ * \param		pNode		Pointer to the node.
  * \param[in]	pParent		Pointer to the new parent node. May be NULL.
  *
  ******************************************************************************/
@@ -226,8 +228,8 @@ inline void lwl__rbNodeSetParent(
  *
  * \brief		Set the color of the supplied node. The parent is not changed.
  *
- * \param[in]	pNode		Pointer to the node.
- * \param[in]	color		The new color.
+ * \param		pNode		Pointer to the node.
+ * \param		color		The new color.
  *
  ******************************************************************************/
 inline void lwl__rbNodeSetColor(
@@ -246,9 +248,9 @@ inline void lwl__rbNodeSetColor(
  *
  * \brief		Set both the parent and the color of the supplied node.
  *
- * \param[in]	pNode		Pointer to the node.
+ * \param		pNode		Pointer to the node.
  * \param[in]	pParent		Pointer to the new parent node. May be NULL.
- * \param[in]	color		The new color.
+ * \param		color		The new color.
  *
  ******************************************************************************/
 inline void lwl__rbNodeSetParentColor(
@@ -268,7 +270,7 @@ inline void lwl__rbNodeSetParentColor(
  *
  * \brief		Initializes the Red-Black Tree.
  *
- * \param		pTree		Poiner to the tree that should be initialized.
+ * \param[out]	pTree		Pointer to the tree that should be initialized.
  *
  ******************************************************************************/
 inline void lwl_rbTreeInit(
@@ -284,7 +286,7 @@ inline void lwl_rbTreeInit(
  *
  * \brief		Initialize tree node.
  *
- * \param[in]	pNode	Pointer to the node.
+ * \param[out]	pNode	Pointer to the node.
  *
  * \details
  *
@@ -380,7 +382,7 @@ inline lwl_RbTreeNode * lwl_rbTreePeekFirst(
  *
  * \brief		Pop the first (leftmost) node.
  *
- * \param[in]	pTree 		Pointer to a tree.
+ * \param		pTree 		Pointer to a tree.
  *
  * \return		Pointer to the popped node. NULL if the tree was empty.
  *
@@ -404,7 +406,7 @@ inline lwl_RbTreeNode * lwl_rbTreePopFirst(
  *
  * \brief		Store a node pointer to the root of the tree.
  *
- * \param[in]	pTree		Pointer to a tree.
+ * \param		pTree		Pointer to a tree.
  * \param[in]	pNode		Pointer to node that should be set as root node.
  *
  * \details		This is only intended for temporarily storing a node pointer to
@@ -430,8 +432,8 @@ inline void lwl_rbTreeSetRootPtr(
  *
  * \brief		Insert the supplied node to the tree.
  *
- * \param[in]	pTree		Pointer to tree.
- * \param[in]	pNewNode	Pointer to node that should be inserted.
+ * \param		pTree		Pointer to tree.
+ * \param		pNewNode	Pointer to node that should be inserted.
  * \param[in]	pCmp		Pointer to node compare information.
  *
  * \details		This is an inline function so that the search loop, and with it

@@ -140,13 +140,13 @@ extern inline void lwl_heapSetRootNode(
  *
  * \brief		Insert the supplied node into the heap.
  *
- * \param[in]	pHeap		Pointer to heap.
- * \param[in]	pNew		Pointer to node that should be inserted.
+ * \param		pHeap		Pointer to heap.
+ * \param		pNew		Pointer to node that should be inserted.
  * \param[in]	pCmp		Pointer to node comparing information.
  *
  * \retval		true		The node was inserted successfully.
  * \retval		false		Could not insert the node. It may already be in a
- * 							heap.
+ * 							heap or the heap may be full.
  *
  * \details		The node and the heap must be initialized before calling this
  * 				function.
@@ -184,12 +184,13 @@ bool lwl_heapInsert(
  *
  * \brief		Remove a node from the heap.
  *
- * \param[in]	pHeap		Pointer to the heap that contains the node.
- * \param[in]	pNode		Pointer to the node that should be removed.
+ * \param		pHeap		Pointer to the heap that contains the node.
+ * \param		pNode		Pointer to the node that should be removed.
  * \param[in]	pCmp		Pointer to the node comparing information.
  *
  * \retval		true		The node was successfully removed.
- * \retval		false		Could not remove the node. Maybe it isn't in a heap.
+ * \retval		false		Could not remove the node. The heap is empty or
+ * 							it doesn't contain the supplied node.
  *
  * \details
  *
@@ -229,9 +230,9 @@ bool lwl_heapRemove(
  *
  * \brief		Move a node towards the root in the heap.
  *
- * \param[in]	pHeap		Pointer to the heap containing the node.
- * \param[in]	pNode		Pointer to the node that should be moved.
- * \param[in]	nodeIdx		Starting index for the move operation.
+ * \param		pHeap		Pointer to the heap containing the node.
+ * \param		pNode		Pointer to the node that should be moved.
+ * \param		nodeIdx		Starting index for the move operation.
  * \param[in]	pCmp		Pointer to the node comparing information.
  *
  * \details		Move a node towards the root node until the heap property is
@@ -280,9 +281,9 @@ static void lwl__heapMoveTowardsRoot(
  *
  * \brief		Move a node towards the leaves in the heap.
  *
- * \param[in]	pHeap		Pointer to the heap containing the node.
- * \param[in]	pNode		Pointer to the node that should be moved.
- * \param[in]	nodeIdx		Starting index for the move operation.
+ * \param		pHeap		Pointer to the heap containing the node.
+ * \param		pNode		Pointer to the node that should be moved.
+ * \param		nodeIdx		Starting index for the move operation.
  * \param[in]	pCmp		Pointer to the node comparing information.
  *
  * \details		Move a node away from the root node until the heap property is
@@ -361,7 +362,7 @@ void lwl__heapMoveTowardsLeaves(
  * \brief		Fill an empty root position and insert a node into the heap.
  *
  * \param[in]	pHeap		Pointer to the heap. Its root position is empty.
- * \param[in]	pNode		Pointer to the node that should be inserted. It is
+ * \param		pNode		Pointer to the node that should be inserted. It is
  * 							usually the node that was the last node.
  * \param[in]	pCmp		Pointer to the node comparing information.
  *
@@ -433,8 +434,8 @@ void lwl__heapMoveToEmptyRoot(
  * \brief		Move a node in a heap.
  *
  * \param[in]	pHeap		Pointer to the heap containing the node.
- * \param[in]	pNode		Pointer to the node that should be moved.
- * \param[in]	nodeIdx		Starting index for the move operation.
+ * \param		pNode		Pointer to the node that should be moved.
+ * \param		nodeIdx		Starting index for the move operation.
  * \param[in]	pCmp		Pointer to the node comparing information.
  *
  * \details		This function is used internally in the heap. It should not

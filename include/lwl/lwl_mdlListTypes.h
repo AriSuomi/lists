@@ -69,12 +69,12 @@
  * Type used by each list node.
  */
 typedef struct {
-	lwl_DlListNode dlListNode; /**< Pointer to list node. 	*/
-	uint8_t		   listIdx;	   /**< List index.				*/
+	lwl_DlListNode dlListNode; /**< Doubly linked list node. 	*/
+	uint8_t		   listIdx;	   /**< List index.					*/
 } lwl_MdlListNode;
 
 /**
- * Type for the doubly linked list.
+ * Type for the priority queue consisting of multiple doubly linked lists.
  */
 typedef struct {
 	lwl_DlList * pLists;  /**< List array.					*/

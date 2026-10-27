@@ -89,9 +89,9 @@
 
 /** ****************************************************************************
  *
- * 	\brief		Initialize list node.
+ * \brief		Initialize list node.
  *
- * 	\param[in]	pNode	Pointer to the node.
+ * \param[out]	pNode	Pointer to the node.
  *
  ******************************************************************************/
 inline void lwl_mdlListNodeInit(
@@ -107,9 +107,9 @@ inline void lwl_mdlListNodeInit(
  *
  * \brief		Initialize list.
  *
- * \param[in]	pMdlList	Pointer to the list.
- * \param[in]	pDlLists	Pointer to array of lists.
- * \param[in]	listCount	Number of lists in the array. Must be a value from
+ * \param[out]	pMdlList	Pointer to the list.
+ * \param[out]	pDlLists	Pointer to array of lists.
+ * \param		listCount	Number of lists in the array. Must be a value from
  * 							1 to 16.
  *
  ******************************************************************************/
@@ -138,10 +138,12 @@ inline void lwl_mdlListInit(
  *
  * \brief		Insert the supplied node to the list.
  *
- * \param[in]	pMdlList	Pointer to list.
- * \param[in]	pNew		Pointer to node that should be inserted.
- * \param[in]	listIdx		The list index. This determines which list should be
- *							used. Higher numbers will be popped first.
+ * \param		pMdlList	Pointer to list.
+ * \param		pNew		Pointer to node that should be inserted.
+ * \param		listIdx		The list index. This determines which list should be
+ *							used. Higher numbers will be popped first. The value
+ *							may not be equal or exceed the listCount supplied to
+ *							lwl_mdlListInit().
  *
  * \retval		true		The Node was inserted successfully.
  * \retval		false		The node could not be inserted.
@@ -179,12 +181,12 @@ inline bool lwl_mdlListInsert(
  *
  * \brief		Store a pointer to an empty list in the fastest possible way.
  *
- * \param[in]	pMdlList	Pointer to list.
- * \param[in]	pNew		Pointer to node that should be inserted.
+ * \param		pMdlList	Pointer to list.
+ * \param		pNode		Pointer to node that should be stored.
  *
  * \details		This can only be done with an empty list. The stored pointer
  * 				must be cleared by storing a NULL pointer before nodes can be
- * 				inserted into the list again.
+ * 				inserted to the list again.
  *
  * 				The stored pointer can be read with lwl_mdlListGetStoredPtr().
  *
@@ -215,8 +217,8 @@ inline lwl_MdlListNode * lwl_mdlListGetStoredPtr(
  *
  * \brief		Remove a node from the list.
  *
- * \param[in]	pMdlList	Pointer to a list.
- * \param[in]	pNode		Pointer to node that should be removed.
+ * \param		pMdlList	Pointer to a list.
+ * \param		pNode		Pointer to node that should be removed.
  *
  * \retval		true		The Node was removed successfully.
  * \retval		false		The node could not be removed.
@@ -256,7 +258,7 @@ inline bool lwl_mdlListRemove(
  *
  * 	\param[in]	pMdlList	Pointer to a list.
  *
- * 	\return		Pointer to the first node.
+ * 	\return		Pointer to the first node. Returns NULL if the list is empty.
  *
  ******************************************************************************/
 static inline lwl_MdlListNode * lwl_mdlListPeekFirst(
@@ -283,7 +285,7 @@ static inline lwl_MdlListNode * lwl_mdlListPeekFirst(
  *
  * 	\brief		Pop the first node.
  *
- * 	\param[in]	pMdlList		Pointer to a list.
+ * 	\param		pMdlList	Pointer to a list.
  *
  * 	\return		Pointer to the popped node. NULL if the list was empty.
  *

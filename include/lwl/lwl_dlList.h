@@ -101,7 +101,9 @@ typedef struct {
  * \retval	false	The second node should be before the first node.
  *
  * \details	Used for functions that determine the order of the list. The second
- * 			node is always the new node when inserting nodes on a list.
+ * 			node is always the new node when inserting nodes on a list. This
+ * 			means that returning true for equal nodes causes the list to be
+ * 			first in first out.
  *
  ******************************************************************************/
 typedef bool lwl_DlListCmpFn(
@@ -150,7 +152,9 @@ inline void lwl_dlListNodeInit(
 	lwl_DlListNode * pNode
 ) {
 	if (pNode != NULL) {
-		/* Nodes not in any list should have all pointers initilized to NULL. */
+		/*
+		 * Nodes not in any list should have all pointers initialized to NULL.
+		 */
 		pNode->pNext = NULL;
 		pNode->pPrev = NULL;
 	}
@@ -186,7 +190,7 @@ inline void lwl_dlListInit(
  *
  * 	\return		Pointer to the last node. NULL if the list is empty.
  *
- * 	\details	This function dos not modify the list in any way.
+ * 	\details	This function does not modify the list in any way.
  *
  ******************************************************************************/
 inline lwl_DlListNode * lwl_dlListPeekLast(
@@ -209,15 +213,15 @@ inline lwl_DlListNode * lwl_dlListPeekLast(
  * \brief	Sneek in a node to the last node pointer.
  *
  * \param	pList		Pointer to a list.
- * \param	pNode		Pointer to node that should be set as root node.
+ * \param	pNode		Pointer to node that should be set as last node.
  *
  * \details	This is a much lighter operation than lwl_dlListPushLast. The
  * 			function can be used in conjunction with lwl_dlListPeekLast to
  * 			store and read arbitrary node pointers to the list while it is
  * 			empty.
  *
- * 			A NULL pointer must be snuck back before anything is inserted or
- * 			pushed to the list.
+ * 			A pointer to the sentinel node of the list must be snuck back before
+ * 			anything is inserted or pushed to the list.
  *
  ******************************************************************************/
 inline void lwl_dlListSneekLast(
@@ -232,15 +236,15 @@ inline void lwl_dlListSneekLast(
  * \brief	Sneek in a node to the first node pointer.
  *
  * \param	pList		Pointer to a list.
- * \param	pNode		Pointer to node that should be set as root node.
+ * \param	pNode		Pointer to node that should be set as first node.
  *
  * \details	This is a much lighter operation than lwl_dlListPushFirst. The
- * 			function can be used in conjunction with lwl_dlListPeekLast to
+ * 			function can be used in conjunction with lwl_dlListPeekFirst to
  * 			store and read arbitrary node pointers to the list while it is
  * 			empty.
  *
- * 			A NULL pointer must be sneeked back before anything is inserted or
- * 			pushed to the list.
+ * 			A pointer to the sentinel node of the list must be snuck back before
+ * 			anything is inserted or pushed to the list.
  *
  ******************************************************************************/
 inline void lwl_dlListSneekFirst(
@@ -395,8 +399,8 @@ inline void lwl_dlListInsertBefore(
  *
  * \brief		Push new node to the tail of the list.
  *
- * \param[in]	pList 		Pointer to list.
- * \param[in]	pNew		Pointer to the new node.
+ * \param		pList 		Pointer to list.
+ * \param		pNew		Pointer to the new node.
  *
  * \retval		true		The Node was pushed successfully.
  * \retval		false		The node could not be pushed.
@@ -419,8 +423,8 @@ inline bool lwl_dlListPushLast(
  *
  * \brief		Push new node to the front of the list.
  *
- * \param[in]	pList 		Pointer to list.
- * \param[in]	pNew		Pointer to the new node.
+ * \param		pList 		Pointer to list.
+ * \param		pNew		Pointer to the new node.
  *
  * \retval		true		The Node was pushed successfully.
  * \retval		false		The node could not be pushed.
@@ -445,7 +449,7 @@ inline bool lwl_dlListPushFirst(
  *
  * 	\param		pList		Pointer to a list.
  *
- * 	\return		Pointer to the first node.
+ * 	\return		Pointer to the first node. Returns NULL if the list is empty.
  *
  ******************************************************************************/
 inline lwl_DlListNode * lwl_dlListPeekFirst(
@@ -468,7 +472,8 @@ inline lwl_DlListNode * lwl_dlListPeekFirst(
  * 	\param		pList		Pointer to the list.
  * 	\param		pNode		Pointer to a list node.
  *
- * 	\return		Pointer to the next node.
+ * 	\return		Pointer to the next node. Returns NULL if the supplied node
+ * 				isn't in any list or if it is the last node.
  *
  * 	\details	This function can be used to enumerate all nodes.
  *
@@ -491,13 +496,16 @@ inline lwl_DlListNode * lwl_dlListPeekNext(
 
 /** ****************************************************************************
  *
- * \brief	Insert node to the correct spot after the specified node.
+ * \brief	Insert node to the correct spot at or after the specified node.
  *
  * \param	pList		Pointer to the list.
  * \param	pListNode	Pointer to node on the list. The search for the correct
  * 						insertion spot will start from this node.
  * \param	pNewNode	The new node that should be inserted.
  * \param	pCmp		Pointer to comparison information.
+ *
+ * \note	This function is intended for internal usage only. It should not be
+ * 			called from other code.
  *
  ******************************************************************************/
 inline void lwl__dlListInsertBack(
@@ -530,8 +538,8 @@ inline void lwl__dlListInsertBack(
  *
  * \brief		Insert the supplied node to the list.
  *
- * \param[in]	pList		Pointer to list.
- * \param[in]	pNewNode	Pointer to node that should be inserted.
+ * \param		pList		Pointer to list.
+ * \param		pNewNode	Pointer to node that should be inserted.
  * \param[in]	pCmp		Pointer to node comparison information.
  *
  * \retval		true		The Node was inserted successfully.

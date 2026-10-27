@@ -102,7 +102,8 @@ typedef struct {
  *
  * \details		Used for functions that determine the order of the list. The
  * 				second node is always the new node when inserting nodes on a
- * 				list.
+ * 				list. This means that returning true for equal nodes causes the
+ * 				list to be first in first out.
  *
  ******************************************************************************/
 typedef bool lwl_SlListCmpFn(
@@ -140,7 +141,7 @@ bool lwl_slListRemove(
  *
  * 	\brief		Initialize list node.
  *
- * 	\param[in]	pNode	Pointer to the node.
+ * 	\param[out]	pNode	Pointer to the node.
  *
  ******************************************************************************/
 inline void lwl_slListNodeInit(
@@ -153,7 +154,7 @@ inline void lwl_slListNodeInit(
  *
  * 	\brief		Initialize list.
  *
- * 	\param[in]	pList	Pointer to the list.
+ * 	\param[out]	pList	Pointer to the list.
  *
  ******************************************************************************/
 inline void lwl_slListInit(
@@ -187,16 +188,16 @@ inline lwl_SlListNode * lwl_slListPeekLast(
  *
  * \brief		Sneek in a node to the last node pointer.
  *
- * \param[in]	pList		Pointer to a list.
- * \param[in]	pNode		Pointer to node that should be set as root node.
+ * \param		pList		Pointer to a list.
+ * \param[in]	pNode		Pointer to node that should be set as last node.
  *
- * \details		This is a much lighter operation than lwl_dlListPushLast. The
- * 				function can be used in conjunction with lwl_dlListPeekLast to
+ * \details		This is a much lighter operation than lwl_slListPushLast. The
+ * 				function can be used in conjunction with lwl_slListPeekLast to
  * 				store and read arbitrary node pointers to the list while it is
  * 				empty.
  *
- * 				A NULL pointer must be snuck back before anything is inserted or
- * 				pushed to the list.
+ * 				A pointer to the sentinel node of the list must be snuck back
+ * 				before anything is inserted or pushed to the list.
  *
  ******************************************************************************/
 inline void lwl_slListSneekLast(
@@ -210,7 +211,7 @@ inline void lwl_slListSneekLast(
  *
  * \brief		Pop the last node.
  *
- * \param[in]	pList 		Pointer to list.
+ * \param		pList 		Pointer to list.
  *
  * \return		Pointer to the popped node. NULL if the list was empty.
  *
@@ -248,8 +249,8 @@ inline bool lwl_slListIsNodeInList(
  *
  * \brief		Push new node to the tail of the list.
  *
- * \param[in]	pList 	Pointer to list.
- * \param[in]	pNew	Pointer to the new node.
+ * \param		pList 	Pointer to list.
+ * \param		pNew	Pointer to the new node.
  *
  * \retval		true	The Node was pushed successfully.
  * \retval		false	The node could not be pushed.
@@ -300,7 +301,7 @@ inline lwl_SlListNode * lwl_slListPeekFirst(
  *
  * 	\brief		Pop the first node.
  *
- * 	\param[in]	pList		Pointer to a list.
+ * 	\param		pList		Pointer to a list.
  *
  * 	\return		Pointer to the popped node. NULL if the list was empty.
  *
@@ -322,8 +323,8 @@ inline lwl_SlListNode * lwl_slListPopFirst(
  *
  * \brief		Insert the supplied node to the list.
  *
- * \param[in]	pList		Pointer to list.
- * \param[in]	pNewNode	Pointer to node that should be inserted.
+ * \param		pList		Pointer to list.
+ * \param		pNewNode	Pointer to node that should be inserted.
  * \param[in]	pCmp		Pointer to node comparison information.
  *
  * \retval		true		The Node was inserted successfully.
