@@ -365,6 +365,8 @@ inline void lwl_heapSetRootNode(
 	const lwl_Heap * pHeap,
 	lwl_HeapNode *	 pNode
 ) {
+	lwl__portAssert(pHeap->nodeCount == 0U);
+
 	pHeap->pElements[0] = pNode;
 }
 

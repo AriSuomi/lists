@@ -204,6 +204,11 @@ inline void lwl_slListSneekLast(
 	lwl_SlList *	 pList,
 	lwl_SlListNode * pNode
 ) {
+	lwl__portAssert(
+		(pList->pLast == &pList->sentinel) ||
+		(pNode == &pList->sentinel)
+	);
+
 	pList->pLast = pNode;
 }
 

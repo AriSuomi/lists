@@ -423,7 +423,7 @@ inline void lwl_rbTreeSetRootPtr(
 	lwl_RbTreeNode * pNode
 ) {
 	lwl__portAssert(pTree != NULL);
-	lwl__portAssert(pTree->root == NULL);
+	lwl__portAssert((pTree->root == NULL) || (pNode == NULL));
 
 	pTree->root = pNode;
 }
