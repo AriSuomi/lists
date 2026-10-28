@@ -319,7 +319,20 @@ inline lwl_SlListNode * lwl_slListPopFirst(
 		return NULL;
 	}
 
-	lwl_slListRemove(pList, pNode);
+	lwl_SlListNode * pNext = pNode->pNext;
+
+	pList->sentinel.pNext = pNext;
+	if (pNext == &pList->sentinel) {
+		/*
+		 * The last node was removed.
+		 */
+		pList->pLast = &pList->sentinel;
+	}
+
+	/*
+	 * Clear next pointer of the node.
+	 */
+	pNode->pNext = NULL;
 
 	return pNode;
 }
