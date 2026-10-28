@@ -197,13 +197,7 @@ bool lwl_dlListMoveNode(
 	if (success) {
 		bool toTheBack = false;
 
-		if (pNext == &pList->sentinel) {
-			/*
-			 * The last node is being moved.
-			 */
-			pNext = pList->sentinel.pPrev;
-
-		} else {
+		if (pNext != &pList->sentinel) {
 			/*
 			 * Check if it should be moved forward or backward in the list.
 			 * Insert the node again by searching for the new spot in the right
@@ -213,9 +207,9 @@ bool lwl_dlListMoveNode(
 		}
 
 		if (toTheBack) {
-			lwl__dlListInsertBack(pList, pNext, pNode, pCmp);
+			lwl__dlListInsertBack(pList, pNext->pNext, pNode, pCmp);
 		} else {
-			lwl__dlListInsertFront(pList, pNext, pNode, pCmp);
+			lwl__dlListInsertFront(pList, pNext->pPrev, pNode, pCmp);
 		}
 	}
 
