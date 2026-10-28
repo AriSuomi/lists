@@ -127,6 +127,8 @@
 static inline uint8_t lwl__portClz16(
 	uint16_t num
 ) {
+	lwl__portAssert(num != 0U);
+
 	unsigned int leadingZeroes = (unsigned int)__builtin_clz((unsigned int)num);
 
 	return (uint8_t)(leadingZeroes - (sizeof(unsigned int) * CHAR_BIT - 16U));
@@ -134,10 +136,12 @@ static inline uint8_t lwl__portClz16(
 #elif defined(_MSC_VER)
 #	include <intrin.h>
 
-static __forceinline uint8_t lwl__portClz16(unsigned short num_) {
-	unsigned long idx_;
-	_BitScanReverse(&idx_, num_);
-	return (uint8_t)(15U - idx_);
+static __forceinline uint8_t lwl__portClz16(unsigned short num) {
+	lwl__portAssert(num != 0U);
+
+	unsigned long idx;
+	_BitScanReverse(&idx, num);
+	return (uint8_t)(15U - idx);
 }
 #else
 /** ****************************************************************************
@@ -152,28 +156,30 @@ static __forceinline uint8_t lwl__portClz16(unsigned short num_) {
 static inline uint8_t lwl__portClz16(
 	uint16_t num
 ) {
-	uint8_t count = 0U;
+	lwl__portAssert(num != 0U);
 
-	if ((num & 0xFF00) == 0U) {
-		count += 8;
-		num <<= 8;
+	uint_fast8_t count = 0U;
+
+	if ((num & 0xFF00U) == 0U) {
+		count += 8U;
+		num <<= 8U;
 	}
 
-	if ((num & 0xF000) == 0U) {
-		count += 4;
-		num <<= 4;
+	if ((num & 0xF000U) == 0U) {
+		count += 4U;
+		num <<= 4U;
 	}
 
-	if ((num & 0xC000) == 0U) {
-		count += 2;
-		num <<= 2;
+	if ((num & 0xC000U) == 0U) {
+		count += 2U;
+		num <<= 2U;
 	}
 
-	if ((num & 0x8000) == 0U) {
-		count += 1;
+	if ((num & 0x8000U) == 0U) {
+		count += 1U;
 	}
 
-	return count;
+	return (uint8_t)count;
 }
 #endif
 
