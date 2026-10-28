@@ -241,11 +241,12 @@ inline bool lwl_mdlListRemove(
 ) {
 	lwl__portAssert(pMdlList != NULL);
 	lwl__portAssert(pNode != NULL);
-	lwl__portAssert(pNode->listIdx != LWL__MDLLIST_INVALID_IDX);
 
 	bool wasRemoved = lwl_dlListRemove(&pNode->dlListNode);
 
 	if (wasRemoved) {
+		lwl__portAssert(pNode->listIdx != LWL__MDLLIST_INVALID_IDX);
+
 		uint_fast8_t	 listIdx = pNode->listIdx;
 		lwl_DlList *	 pList = &pMdlList->pLists[listIdx];
 		lwl_DlListNode * pLastNode = lwl_dlListPeekLast(pList);
