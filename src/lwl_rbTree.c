@@ -343,7 +343,7 @@ static void lwl__rbTreeRotate(
 	lwl__rbNodeSetParent(pChild, pParent);
 
 	if (pParent == NULL) {
-		pTree->root = pChild;
+		pTree->pRoot = pChild;
 
 	} else if (pNode == pParent->children[direction]) {
 		pParent->children[direction] = pChild;
@@ -452,7 +452,7 @@ void lwl__rbTreeInsertFixup(
 		}
 	}
 
-	lwl__rbNodeSetColor(pTree->root, LWL__RBCOLOR_BLACK);
+	lwl__rbNodeSetColor(pTree->pRoot, LWL__RBCOLOR_BLACK);
 }
 
 /** ****************************************************************************
@@ -476,7 +476,7 @@ static void lwl__rbTreeGraftNode(
 	lwl_RbTreeNode * pRootstock = lwl__rbNodeGetParent(pOldBranch);
 
 	if (pRootstock == NULL) {
-		pTree->root = pScion;
+		pTree->pRoot = pScion;
 
 	} else {
 		lwl__RbNodeDir nodeDir = lwl__rbTreeGetNodeDir(pOldBranch, pRootstock);

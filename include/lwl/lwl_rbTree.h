@@ -115,8 +115,8 @@ struct lwl__rbTreeNode {
  * The Red-Black Tree.
  */
 typedef struct {
-	lwl_RbTreeNode * root;		// Pointer to the root of the tree
-	lwl_RbTreeNode * pLeftmost; // Pointer to the first node of the tree
+	lwl_RbTreeNode * pRoot;		/**< Pointer to the root of the tree 		*/
+	lwl_RbTreeNode * pLeftmost; /**< Pointer to the first node of the tree 	*/
 } lwl_RbTree;
 
 /** ****************************************************************************
@@ -278,7 +278,7 @@ inline void lwl_rbTreeInit(
 ) {
 	lwl__portAssert(pTree != NULL);
 
-	pTree->root = NULL;
+	pTree->pRoot = NULL;
 	pTree->pLeftmost = NULL;
 }
 
@@ -424,7 +424,7 @@ inline void lwl_rbTreeStorePtr(
 	lwl_RbTreeNode * pNode
 ) {
 	lwl__portAssert(pTree != NULL);
-	lwl__portAssert(pTree->root == NULL);
+	lwl__portAssert(pTree->pRoot == NULL);
 	lwl__portAssert((pTree->pLeftmost == NULL) || (pNode == NULL));
 
 	pTree->pLeftmost = pNode;
@@ -453,7 +453,7 @@ inline void lwl_rbTreeInsertNode(
 	lwl__portAssert(pNewNode != NULL);
 	lwl__portAssert(lwl_rbNodeIsInTree(pNewNode) == false);
 	lwl__portAssert(pCmp != NULL);
-	lwl__portAssert((pTree->root != NULL) || (pTree->pLeftmost == NULL));
+	lwl__portAssert((pTree->pRoot != NULL) || (pTree->pLeftmost == NULL));
 
 	lwl_RbTreeNode * pParent = NULL;
 	lwl__RbNodeDir	 dir = LWL__RBDIR_LEFT;
@@ -465,7 +465,7 @@ inline void lwl_rbTreeInsertNode(
 	lwl_RbTreeCmpFn * pCmpFn = pCmp->pCmpFn;
 	const void *	  pCmpParam = pCmp->pCmpParam;
 
-	lwl_RbTreeNode * pTreeNode = pTree->root;
+	lwl_RbTreeNode * pTreeNode = pTree->pRoot;
 	while (pTreeNode != NULL) {
 		pParent = pTreeNode;
 
@@ -484,7 +484,7 @@ inline void lwl_rbTreeInsertNode(
 	lwl__rbNodeSetParentColor(pNewNode, pParent, LWL__RBCOLOR_RED);
 
 	if (pParent == NULL) {
-		pTree->root = pNewNode;
+		pTree->pRoot = pNewNode;
 	} else {
 		pParent->children[dir] = pNewNode;
 	}
