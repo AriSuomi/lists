@@ -317,10 +317,12 @@ inline lwl_SlListNode * lwl_slListPopFirst(
 ) {
 	lwl__portAssert(pList != NULL);
 
-	lwl_SlListNode * pNode = lwl_slListPeekFirst(pList);
-	if (pNode != NULL) {
-		lwl_slListRemove(pList, pNode);
+	lwl_SlListNode * pNode = pList->sentinel.pNext;
+	if (pNode == &pList->sentinel) {
+		return NULL;
 	}
+
+	lwl_slListRemove(pList, pNode);
 
 	return pNode;
 }
