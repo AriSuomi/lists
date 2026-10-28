@@ -73,6 +73,9 @@
 ;
 ;-----------------------------------------------------------------------------*/
 
+/**
+ * Type for storing direction.
+ */
 typedef enum {
 	LWL__RBDIR_LEFT,
 	LWL__RBDIR_RIGHT,
@@ -87,9 +90,6 @@ typedef enum {
 	LWL__RBCOLOR_BLACK
 } lwl__RbNodeColor;
 
-/**
- * Type used by each tree node.
- */
 typedef struct lwl__rbTreeNode lwl_RbTreeNode;
 
 /**
@@ -132,7 +132,7 @@ typedef struct {
  *
  * \details	Used for functions that determine the order of the tree. The second
  * 			node is always the new node when inserting nodes into the tree.
- * 			This means that returning true for equal nodes causes the list to be
+ * 			This means that returning true for equal nodes causes the tree to be
  * 			first in first out.
  *
  ******************************************************************************/

@@ -67,9 +67,6 @@
 ;
 ;-----------------------------------------------------------------------------*/
 
-/**
- * Type used by each list node.
- */
 typedef struct lwl__slListNode lwl_SlListNode;
 
 /**
@@ -83,8 +80,8 @@ struct lwl__slListNode {
  * Type for the singly linked list.
  */
 typedef struct {
-	lwl_SlListNode	 sentinel;
-	lwl_SlListNode * pLast; /**< Pointer to last node.			*/
+	lwl_SlListNode	 sentinel; /**< Sentinel node with first node pointer. 	*/
+	lwl_SlListNode * pLast; /**< Pointer to last node.						*/
 } lwl_SlList;
 
 /** ****************************************************************************
@@ -258,7 +255,7 @@ inline bool lwl_slListIsNodeInList(
  * \param		pList 	Pointer to list.
  * \param		pNew	Pointer to the new node.
  *
- * \retval		true	The Node was pushed successfully.
+ * \retval		true	The node was pushed successfully.
  * \retval		false	The node could not be pushed.
  *
  ******************************************************************************/
@@ -335,7 +332,7 @@ inline lwl_SlListNode * lwl_slListPopFirst(
  * \param		pNewNode	Pointer to node that should be inserted.
  * \param[in]	pCmp		Pointer to node comparison information.
  *
- * \retval		true		The Node was inserted successfully.
+ * \retval		true		The node was inserted successfully.
  * \retval		false		The node could not be inserted.
  *
  ******************************************************************************/
@@ -365,7 +362,9 @@ inline bool lwl_slListInsert(
 			bool notFound = pCmpFn(pListNode, pNewNode, pCmpParam);
 
 			if (!notFound) {
-				/* Found the spot. The new node should be before this list node. */
+				/*
+				 * Found the spot. The new node should be before this list node.
+				 */
 				break;
 			}
 

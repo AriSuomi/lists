@@ -145,7 +145,7 @@ inline void lwl_mdlListInit(
  *							may not be equal or exceed the listCount supplied to
  *							lwl_mdlListInit().
  *
- * \retval		true		The Node was inserted successfully.
+ * \retval		true		The node was inserted successfully.
  * \retval		false		The node could not be inserted.
  *
  ******************************************************************************/
@@ -231,7 +231,7 @@ inline lwl_MdlListNode * lwl_mdlListGetStoredPtr(
  * \param		pMdlList	Pointer to a list.
  * \param		pNode		Pointer to node that should be removed.
  *
- * \retval		true		The Node was removed successfully.
+ * \retval		true		The node was removed successfully.
  * \retval		false		The node could not be removed.
  *
  ******************************************************************************/

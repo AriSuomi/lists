@@ -67,9 +67,6 @@
 ;
 ;-----------------------------------------------------------------------------*/
 
-/**
- * Type used by each list node.
- */
 typedef struct lwl__dlListNode lwl_DlListNode;
 
 /**
@@ -260,7 +257,7 @@ inline bool lwl_dlListIsNodeInList(
  *
  * \param	pNode		Pointer to node that should be removed.
  *
- * \retval	true		The Node was removed successfully.
+ * \retval	true		The node was removed successfully.
  * \retval	false		The node could not be removed.
  *
  ******************************************************************************/
@@ -360,7 +357,7 @@ inline lwl_DlListNode * lwl_dlListPopFirst(
  *
  * 	\param		pListNode	Pointer to node on the list. The new node will be
  * 							inserted before this node.
- * 	\param		pNewNode	Pointer to the node that shoud be inserted.
+ * 	\param		pNewNode	Pointer to the node that should be inserted.
  *
  ******************************************************************************/
 inline void lwl_dlListInsertBefore(
@@ -385,7 +382,7 @@ inline void lwl_dlListInsertBefore(
  * \param		pList 		Pointer to list.
  * \param		pNew		Pointer to the new node.
  *
- * \retval		true		The Node was pushed successfully.
+ * \retval		true		The node was pushed successfully.
  * \retval		false		The node could not be pushed.
  *
  ******************************************************************************/
@@ -409,7 +406,7 @@ inline bool lwl_dlListPushLast(
  * \param		pList 		Pointer to list.
  * \param		pNew		Pointer to the new node.
  *
- * \retval		true		The Node was pushed successfully.
+ * \retval		true		The node was pushed successfully.
  * \retval		false		The node could not be pushed.
  *
  ******************************************************************************/
@@ -525,7 +522,7 @@ inline void lwl__dlListInsertBack(
  * \param		pNewNode	Pointer to node that should be inserted.
  * \param[in]	pCmp		Pointer to node comparison information.
  *
- * \retval		true		The Node was inserted successfully.
+ * \retval		true		The node was inserted successfully.
  * \retval		false		The node could not be inserted.
  *
  * \details		The node will be inserted into the list to the correct spot

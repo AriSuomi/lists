@@ -69,8 +69,8 @@
  * Type used by each list node.
  */
 typedef struct {
-	lwl_DlListNode dlListNode; /**< Doubly linked list node. 	*/
-	uint8_t		   listIdx;	   /**< List index.					*/
+	lwl_DlListNode dlListNode; /**< Doubly linked list node. Must be first.	*/
+	uint8_t		   listIdx;	   /**< List index.								*/
 } lwl_MdlListNode;
 
 /**

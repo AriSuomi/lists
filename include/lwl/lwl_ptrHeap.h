@@ -67,9 +67,6 @@
 ;
 ;-----------------------------------------------------------------------------*/
 
-/**
- * Type used by each heap node.
- */
 typedef struct lwl__ptrHeapNode lwl_PtrHeapNode;
 
 /**
@@ -86,7 +83,7 @@ struct lwl__ptrHeapNode {
  */
 typedef struct {
 	lwl_PtrHeapNode * pRoot;	 /**< Pointer to root node. */
-	uint16_t		  nodeCount; /**< Number of nodes in tree. */
+	uint16_t		  nodeCount; /**< Number of nodes in the heap. */
 } lwl_PtrHeap;
 
 /** ****************************************************************************
@@ -100,7 +97,7 @@ typedef struct {
  * \retval	true	The first node should be before the second node.
  * \retval	false	The second node should be before the first node.
  *
- * \details	Used for functions that determine the order of the tree.
+ * \details	Used for functions that determine the order of the heap.
  *
  ******************************************************************************/
 typedef bool lwl_PtrHeapCmpFn(
