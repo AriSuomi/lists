@@ -148,13 +148,13 @@ bool lwl_dlListMoveNode(
 inline void lwl_dlListNodeInit(
 	lwl_DlListNode * pNode
 ) {
-	if (pNode != NULL) {
-		/*
-		 * Nodes not in any list should have all pointers initialized to NULL.
-		 */
-		pNode->pNext = NULL;
-		pNode->pPrev = NULL;
-	}
+	lwl__portAssert(pNode != NULL);
+
+	/*
+	 * Nodes not in any list should have all pointers initialized to NULL.
+	 */
+	pNode->pNext = NULL;
+	pNode->pPrev = NULL;
 }
 
 /** ****************************************************************************
