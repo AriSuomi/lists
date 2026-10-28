@@ -90,7 +90,7 @@ extern inline lwl_SlListNode * lwl_slListPeekLast(
 	const lwl_SlList * pList
 );
 
-extern inline void lwl_slListSneekLast(
+extern inline void lwl_slListStorePtr(
 	lwl_SlList *	 pList,
 	lwl_SlListNode * pNode
 );

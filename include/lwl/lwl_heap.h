@@ -347,21 +347,21 @@ inline lwl_HeapNode * lwl_heapPopFirst(
 
 /** ****************************************************************************
  *
- * \brief		Set the root node.
+ * \brief		Quickly store a node pointer to the heap.
  *
  * \param 		pHeap		Pointer to a heap.
- * \param 		pNode		Pointer to node that should be set as root node.
+ * \param[in]	pNode		The pointer that should be stored.
  *
- * \details		This function can be used to quickly store a node pointer
- * 				directly to the root of the heap. This is faster than
+ * \details		This function can be used to store one node pointer to the heap
+ * 				instead of using it as a heap. The stored pointer can be read
+ * 				with lwl_heapGetStoredPtr(). It is a much lighter operation than
  * 				lwl_heapInsert().
  *
- * 				The purpose of this function is to temporarily store a node to
- * 				the root of the heap while the heap is empty. A NULL pointer
- * 				must be stored before nodes are inserted into the heap again.
+ * \note		The heap must be empty before storing a node pointer with this
+ * 				function.
  *
  ******************************************************************************/
-inline void lwl_heapSetRootNode(
+inline void lwl_heapStorePtr(
 	const lwl_Heap * pHeap,
 	lwl_HeapNode *	 pNode
 ) {
@@ -372,19 +372,21 @@ inline void lwl_heapSetRootNode(
 
 /** ****************************************************************************
  *
- * \brief		Get the root node.
+ * \brief		Get the pointer stored with lwl_heapStorePtr().
  *
  * \param[in] 	pHeap		Pointer to a heap.
  *
- * \return		Pointer to the root node.
+ * \return		The stored pointer.
  *
- * \details		Returns the stored root node. This function should only be used
- * 				to read the pointer stored with lwl_heapSetRootNode().
+ * \details		Returns the stored pointer. This function should only be used
+ * 				to read the pointer stored with lwl_heapStorePtr().
  *
  ******************************************************************************/
-inline lwl_HeapNode * lwl_heapGetRootNode(
+inline lwl_HeapNode * lwl_heapGetStoredPtr(
 	const lwl_Heap * pHeap
 ) {
+	lwl__portAssert(pHeap->nodeCount == 0U);
+
 	return pHeap->pElements[0];
 }
 

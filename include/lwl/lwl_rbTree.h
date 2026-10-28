@@ -404,28 +404,30 @@ inline lwl_RbTreeNode * lwl_rbTreePopFirst(
 
 /** ****************************************************************************
  *
- * \brief		Store a node pointer to the root of the tree.
+ * \brief		Quickly store a node pointer to the tree.
  *
  * \param		pTree		Pointer to a tree.
- * \param[in]	pNode		Pointer to node that should be set as root node.
+ * \param[in]	pNode		The pointer that should be stored.
  *
- * \details		This is only intended for temporarily storing a node pointer to
- * 				the tree as fast as possible. It does not update any other
- * 				pointers in the tree and additional nodes cannot be stored after
- * 				this function has been called.
+ * \details		This function can be used to store one node pointer to the tree
+ * 				instead of using it as a tree. The stored pointer can be read
+ * 				with lwl_rbTreePeekFirst(). It is a much lighter operation than
+ * 				lwl_rbTreeInsertNode().
  *
- * \note		May only be called for an empty tree. NULL must be stored before
- * 				inserting nodes to the tree.
+ * \note		The tree must be empty before storing a node pointer with this
+ * 				function. A NULL pointer must be stored back before anything is
+ * 				inserted into the tree.
  *
  ******************************************************************************/
-inline void lwl_rbTreeSetRootPtr(
+inline void lwl_rbTreeStorePtr(
 	lwl_RbTree *	 pTree,
 	lwl_RbTreeNode * pNode
 ) {
 	lwl__portAssert(pTree != NULL);
-	lwl__portAssert((pTree->root == NULL) || (pNode == NULL));
+	lwl__portAssert(pTree->root == NULL);
+	lwl__portAssert((pTree->pLeftmost == NULL) || (pNode == NULL));
 
-	pTree->root = pNode;
+	pTree->pLeftmost = pNode;
 }
 
 /** ****************************************************************************
@@ -451,6 +453,7 @@ inline void lwl_rbTreeInsertNode(
 	lwl__portAssert(pNewNode != NULL);
 	lwl__portAssert(lwl_rbNodeIsInTree(pNewNode) == false);
 	lwl__portAssert(pCmp != NULL);
+	lwl__portAssert((pTree->root != NULL) || (pTree->pLeftmost == NULL));
 
 	lwl_RbTreeNode * pParent = NULL;
 	lwl__RbNodeDir	 dir = LWL__RBDIR_LEFT;

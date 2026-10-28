@@ -210,48 +210,31 @@ inline lwl_DlListNode * lwl_dlListPeekLast(
 
 /** ****************************************************************************
  *
- * \brief	Sneek in a node to the last node pointer.
+ * \brief		Quickly store a node pointer to the list.
  *
- * \param	pList		Pointer to a list.
- * \param	pNode		Pointer to node that should be set as last node.
+ * \param		pList		Pointer to a list.
+ * \param[in]	pNode		The pointer that should be stored.
  *
- * \details	This is a much lighter operation than lwl_dlListPushLast. The
- * 			function can be used in conjunction with lwl_dlListPeekLast to
- * 			store and read arbitrary node pointers to the list while it is
- * 			empty.
+ * \details		This function can be used to store one node pointer to the list
+ * 				instead of using it as a list. The stored pointer can be read
+ * 				with lwl_dlListPeekLast(). It is a much lighter operation than
+ * 				lwl_dlListPushLast().
  *
- * 			A pointer to the sentinel node of the list must be snuck back before
- * 			anything is inserted or pushed to the list.
+ * \note		The list must be empty before storing a node pointer with this
+ * 				function. A pointer to the sentinel node of the list must be
+ * 				stored back before anything is inserted or pushed to the list.
  *
  ******************************************************************************/
-inline void lwl_dlListSneekLast(
+inline void lwl_dlListStorePtr(
 	lwl_DlList *	 pList,
 	lwl_DlListNode * pNode
 ) {
-	pList->sentinel.pPrev = pNode;
-}
+	lwl__portAssert(
+		(pList->sentinel.pPrev == &pList->sentinel) ||
+		(pNode == &pList->sentinel)
+	);
 
-/** ****************************************************************************
- *
- * \brief	Sneek in a node to the first node pointer.
- *
- * \param	pList		Pointer to a list.
- * \param	pNode		Pointer to node that should be set as first node.
- *
- * \details	This is a much lighter operation than lwl_dlListPushFirst. The
- * 			function can be used in conjunction with lwl_dlListPeekFirst to
- * 			store and read arbitrary node pointers to the list while it is
- * 			empty.
- *
- * 			A pointer to the sentinel node of the list must be snuck back before
- * 			anything is inserted or pushed to the list.
- *
- ******************************************************************************/
-inline void lwl_dlListSneekFirst(
-	lwl_DlList *	 pList,
-	lwl_DlListNode * pNode
-) {
-	pList->sentinel.pNext = pNode;
+	pList->sentinel.pPrev = pNode;
 }
 
 /** ****************************************************************************

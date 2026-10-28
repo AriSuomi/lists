@@ -95,12 +95,7 @@ extern inline lwl_DlListNode * lwl_dlListPeekLast(
 	const lwl_DlList * pList
 );
 
-extern inline void lwl_dlListSneekLast(
-	lwl_DlList *	 pList,
-	lwl_DlListNode * pNode
-);
-
-extern inline void lwl_dlListSneekFirst(
+extern inline void lwl_dlListStorePtr(
 	lwl_DlList *	 pList,
 	lwl_DlListNode * pNode
 );

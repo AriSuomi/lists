@@ -166,7 +166,7 @@ extern inline lwl_RbTreeNode * lwl_rbTreePopFirst(
 	lwl_RbTree * pTree
 );
 
-extern inline void lwl_rbTreeSetRootPtr(
+extern inline void lwl_rbTreeStorePtr(
 	lwl_RbTree *	 pTree,
 	lwl_RbTreeNode * pNode
 );

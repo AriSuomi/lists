@@ -136,7 +136,7 @@ extern inline void lwl_ptrHeapInit(
 	lwl_PtrHeap * pHeap
 );
 
-extern inline void lwl_ptrHeapSetRootPtr(
+extern inline void lwl_ptrHeapStorePtr(
 	lwl_PtrHeap *	  pHeap,
 	lwl_PtrHeapNode * pNode
 );

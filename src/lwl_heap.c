@@ -119,12 +119,12 @@ extern inline lwl_HeapNode * lwl_heapPopFirst(
 	const lwl_HeapCmp * pCmp
 );
 
-extern inline void lwl_heapSetRootNode(
+extern inline void lwl_heapStorePtr(
 	const lwl_Heap * pHeap,
 	lwl_HeapNode *	 pNode
 );
 
-extern inline lwl_HeapNode * lwl_heapGetRootNode(
+extern inline lwl_HeapNode * lwl_heapGetStoredPtr(
 	const lwl_Heap * pHeap
 );
 

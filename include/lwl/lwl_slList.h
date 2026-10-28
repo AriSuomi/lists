@@ -186,21 +186,22 @@ inline lwl_SlListNode * lwl_slListPeekLast(
 
 /** ****************************************************************************
  *
- * \brief		Sneek in a node to the last node pointer.
+ * \brief		Quickly store a node pointer to the list.
  *
  * \param		pList		Pointer to a list.
- * \param[in]	pNode		Pointer to node that should be set as last node.
+ * \param[in]	pNode		The pointer that should be stored.
  *
- * \details		This is a much lighter operation than lwl_slListPushLast. The
- * 				function can be used in conjunction with lwl_slListPeekLast to
- * 				store and read arbitrary node pointers to the list while it is
- * 				empty.
+ * \details		This function can be used to store one node pointer to the list
+ * 				instead of using it as a list. The stored pointer can be read
+ * 				with lwl_slListPeekLast(). It is a much lighter operation than
+ * 				lwl_slListPushLast().
  *
- * 				A pointer to the sentinel node of the list must be snuck back
- * 				before anything is inserted or pushed to the list.
+ * \note		The list must be empty before storing a node pointer with this
+ * 				function. A pointer to the sentinel node of the list must be
+ * 				stored back before anything is inserted or pushed to the list.
  *
  ******************************************************************************/
-inline void lwl_slListSneekLast(
+inline void lwl_slListStorePtr(
 	lwl_SlList *	 pList,
 	lwl_SlListNode * pNode
 ) {

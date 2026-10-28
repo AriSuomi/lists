@@ -276,21 +276,28 @@ inline void lwl_ptrHeapInit(
 
 /** ****************************************************************************
  *
- * \brief		Store a node pointer to the root of the heap.
+ * \brief		Quickly store a node pointer to the heap.
  *
  * \param		pHeap		Pointer to a heap.
- * \param[in]	pNode		Pointer to node that should be set as root node.
+ * \param[in]	pNode		The pointer that should be stored.
  *
- * \details
+ * \details		This function can be used to store one node pointer to the heap
+ * 				instead of using it as a heap. The stored pointer can be read
+ * 				with lwl_ptrHeapPeekFirst(). It is a much lighter operation than
+ * 				lwl_ptrHeapInsert().
  *
- * \note		May only be called for an empty heap. NULL must be stored before
- * 				inserting nodes to the heap.
+ * \note		The heap must be empty before storing a node pointer with this
+ * 				function. A NULL pointer must be stored back before anything is
+ * 				inserted into the heap.
  *
  ******************************************************************************/
-inline void lwl_ptrHeapSetRootPtr(
+inline void lwl_ptrHeapStorePtr(
 	lwl_PtrHeap *	  pHeap,
 	lwl_PtrHeapNode * pNode
 ) {
+	lwl__portAssert(pHeap->nodeCount == 0U);
+	lwl__portAssert((pHeap->pRoot == NULL) || (pNode == NULL));
+
 	pHeap->pRoot = pNode;
 }
 

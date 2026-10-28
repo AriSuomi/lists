@@ -179,32 +179,37 @@ inline bool lwl_mdlListInsert(
 
 /** ****************************************************************************
  *
- * \brief		Store a pointer to an empty list in the fastest possible way.
+ * \brief		Quickly store a node pointer to the list.
  *
  * \param		pMdlList	Pointer to list.
  * \param		pNode		Pointer to node that should be stored.
  *
- * \details		This can only be done with an empty list. The stored pointer
- * 				must be cleared by storing a NULL pointer before nodes can be
- * 				inserted to the list again.
+ * \details		This function can be used to store one node pointer to the list
+ * 				instead of using it as a list. The stored pointer can be read
+ * 				with lwl_mdlListGetStoredPtr(). It is a much lighter operation
+ * 				than lwl_mdlListInsert().
  *
- * 				The stored pointer can be read with lwl_mdlListGetStoredPtr().
+ * \note		The list must be empty before storing a node pointer with this
+ * 				function. A NULL pointer must be stored back before anything is
+ * 				inserted into the list.
  *
  ******************************************************************************/
 inline void lwl_mdlListStorePtr(
 	lwl_MdlList *	  pMdlList,
 	lwl_MdlListNode * pNode
 ) {
+	lwl__portAssert(pMdlList->listMap == 0U);
+
 	lwl_DlListNode * pDlNode = (pNode == NULL)
 		? &pMdlList->pLists[0].sentinel
 		: &pNode->dlListNode;
 
-	lwl_dlListSneekLast(&pMdlList->pLists[0], pDlNode);
+	lwl_dlListStorePtr(&pMdlList->pLists[0], pDlNode);
 }
 
 /** ****************************************************************************
  *
- * \brief		Get the pointer stored with lwl_mdlListStorePtr.
+ * \brief		Get the pointer stored with lwl_mdlListStorePtr().
  *
  * \param[in]	pMdlList	Pointer to list.
  *
@@ -214,6 +219,8 @@ inline void lwl_mdlListStorePtr(
 inline lwl_MdlListNode * lwl_mdlListGetStoredPtr(
 	const lwl_MdlList * pMdlList
 ) {
+	lwl__portAssert(pMdlList->listMap == 0U);
+
 	return (lwl_MdlListNode *)lwl_dlListPeekLast(&pMdlList->pLists[0]);
 }
 
