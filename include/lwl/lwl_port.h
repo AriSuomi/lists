@@ -110,7 +110,8 @@
 ;	F U N C T I O N S
 ;
 ;-----------------------------------------------------------------------------*/
-#ifdef __GNUC__
+/* clang targeting MSVC defines _MSC_VER but not __GNUC__ */
+#if defined(__GNUC__) || defined(__clang__)
 /** ****************************************************************************
  *
  * 	\brief		Count leading zeroes from 16-bit value.
