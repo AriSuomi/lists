@@ -4,8 +4,6 @@
  *
  * \brief	Source file for the singly linked list implementation.
  *
- * \details
- *
  ******************************************************************************/
 /*
  *  2026-04-29

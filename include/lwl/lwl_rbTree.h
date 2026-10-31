@@ -288,8 +288,6 @@ inline void lwl_rbTreeInit(
  *
  * \param[out]	pNode	Pointer to the node.
  *
- * \details
- *
  ******************************************************************************/
 inline void lwl_rbNodeInit(
 	lwl_RbTreeNode * pNode
@@ -318,8 +316,6 @@ inline void lwl_rbNodeInit(
  * \retval		true		The node is in a tree.
  * \retval		false		The node is not in a tree.
  *
- * \details
- *
  ******************************************************************************/
 inline bool lwl_rbNodeIsInTree(
 	const lwl_RbTreeNode * pNode
@@ -342,9 +338,8 @@ inline bool lwl_rbNodeIsInTree(
  *
  * \param[in]	pNode		Parent node.
  *
- * \return		Pointer to the leftmost child node.
- *
- * \details
+ * \return		Pointer to the leftmost child node. This may be a pointer to the
+ * 				supplied node itself.
  *
  ******************************************************************************/
 inline lwl_RbTreeNode * lwl_rbTreeGetLeftmostChild(
@@ -367,8 +362,6 @@ inline lwl_RbTreeNode * lwl_rbTreeGetLeftmostChild(
  *
  * \return		Pointer to the first node. NULL if the tree is empty.
  *
- * \details
- *
  ******************************************************************************/
 inline lwl_RbTreeNode * lwl_rbTreePeekFirst(
 	const lwl_RbTree * pTree
@@ -385,8 +378,6 @@ inline lwl_RbTreeNode * lwl_rbTreePeekFirst(
  * \param		pTree 		Pointer to a tree.
  *
  * \return		Pointer to the popped node. NULL if the tree was empty.
- *
- * \details
  *
  ******************************************************************************/
 inline lwl_RbTreeNode * lwl_rbTreePopFirst(
@@ -499,9 +490,9 @@ inline void lwl_rbTreeInsertNode(
 	}
 
 	/*
-	 * Most new nodes need no fixup: the first node only becomes the black
-	 * root, and a node with a black parent breaks no rule. Checking this here
-	 * avoids calling the fixup function in the common case.
+	 * Most new nodes need no fixup: the first node inserted into a tree only
+	 * becomes the black root, and a node with a black parent breaks no rule.
+	 * Checking this here avoids calling the fixup function in the common case.
 	 */
 	if (pParent == NULL) {
 		lwl__rbNodeSetColor(pNewNode, LWL__RBCOLOR_BLACK);

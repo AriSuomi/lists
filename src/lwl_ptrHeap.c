@@ -487,9 +487,6 @@ static void lwl__ptrHeapSwapAdjacentNodes(
 		}
 	}
 
-	/*
-	 * Update the pointer to and from child nodes of the new child node.
-	 */
 	if (pParentLeft == pChild) {
 		/*
 		 * The child node was the left child of the parent.

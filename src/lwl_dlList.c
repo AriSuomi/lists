@@ -4,8 +4,6 @@
  *
  * \brief	Source file for the doubly linked list implementation.
  *
- * \details
- *
  ******************************************************************************/
 /*
  *  2026-04-29
@@ -218,7 +216,7 @@ bool lwl_dlListMoveNode(
 
 /** ****************************************************************************
  *
- * \brief	Insert node to the correct spot before the specified node.
+ * \brief	Insert node to the correct spot at or before the specified node.
  *
  * \param	pList		Pointer to the list.
  * \param	pListNode	Pointer to node on the list. The search for the correct

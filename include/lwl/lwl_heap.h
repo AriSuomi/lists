@@ -104,7 +104,8 @@ typedef struct {
  * \retval		true	The first node should be before the second node.
  * \retval		false	The second node should be before the first node.
  *
- * \details		Used for functions that determine the order of the heap.
+ * \details		Used for functions that determine the order of the heap. False
+ * 				should be returned for equal nodeds to avoid unnecessary swaps.
  *
  ******************************************************************************/
 typedef bool lwl_HeapCmpFn(

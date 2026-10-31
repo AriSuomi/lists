@@ -195,8 +195,6 @@ bool lwl_heapInsert(
  * \retval		false		Could not remove the node. The heap is empty or
  * 							it doesn't contain the supplied node.
  *
- * \details
- *
  ******************************************************************************/
 bool lwl_heapRemove(
 	lwl_Heap *			pHeap,

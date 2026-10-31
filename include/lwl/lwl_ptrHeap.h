@@ -90,14 +90,15 @@ typedef struct {
  *
  * \brief	Function type used for node compare functions.
  *
- * \param	pNode1	Pointer to the first node.
- * \param	pNode2 	Pointer to the second node.
- * \param	pParam	Pointer to comparison parameter.
+ * \param[in]	pNode1	Pointer to the first node.
+ * \param[in]	pNode2 	Pointer to the second node.
+ * \param[in]	pParam	Pointer to comparison parameter.
  *
- * \retval	true	The first node should be before the second node.
- * \retval	false	The second node should be before the first node.
+ * \retval		true	The first node should be before the second node.
+ * \retval		false	The second node should be before the first node.
  *
- * \details	Used for functions that determine the order of the heap.
+ * \details		Used for functions that determine the order of the heap. False
+ * 				should be returned for equal nodeds to avoid unnecessary swaps.
  *
  ******************************************************************************/
 typedef bool lwl_PtrHeapCmpFn(
@@ -153,8 +154,6 @@ bool lwl_ptrHeapRemove(
  * \retval		true		The node is in a heap.
  * \retval		false		The node is not in a heap.
  *
- * \details
- *
  ******************************************************************************/
 inline bool lwl_ptrHeapIsNodeInHeap(
 	const lwl_PtrHeapNode * pNode
@@ -202,8 +201,6 @@ inline bool lwl_ptrHeapMoveNode(
  *
  * \return		Pointer to the first node. Returns NULL if the heap is empty.
  *
- * \details
- *
  ******************************************************************************/
 inline lwl_PtrHeapNode * lwl_ptrHeapPeekFirst(
 	const lwl_PtrHeap * pHeap
@@ -219,8 +216,6 @@ inline lwl_PtrHeapNode * lwl_ptrHeapPeekFirst(
  * \param[in]	pCmp		Pointer to node comparison information.
  *
  * \return		Pointer to the popped node. NULL if the heap was empty.
- *
- * \details
  *
  ******************************************************************************/
 inline lwl_PtrHeapNode * lwl_ptrHeapPopFirst(
@@ -244,8 +239,6 @@ inline lwl_PtrHeapNode * lwl_ptrHeapPopFirst(
  *
  * \param[out]	pNode		Pointer to the node.
  *
- * \details
- *
  ******************************************************************************/
 inline void lwl_ptrHeapNodeInit(
 	lwl_PtrHeapNode * pNode
@@ -260,8 +253,6 @@ inline void lwl_ptrHeapNodeInit(
  * \brief		Initialize heap.
  *
  * \param[out]	pHeap		Pointer to the heap.
- *
- * \details
  *
  ******************************************************************************/
 inline void lwl_ptrHeapInit(

@@ -4,8 +4,6 @@
  *
  * \brief	Source file for the red black tree implementation.
  *
- * \details
- *
  ******************************************************************************/
 /*
  *  2026-04-29
@@ -316,8 +314,6 @@ static inline bool lwl__rbNodeIsRed(
  * \param		pTree		Pointer to the tree.
  * \param		pNode		The rotation should be done around this node.
  * \param		direction	The rotation direction.
- *
- * \details
  *
  ******************************************************************************/
 static void lwl__rbTreeRotate(
