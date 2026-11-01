@@ -93,10 +93,6 @@ extern inline void lwl_slListStorePtr(
 	lwl_SlListNode * pNode
 );
 
-extern inline lwl_SlListNode * lwl_slListPopLast(
-	lwl_SlList * pList
-);
-
 extern inline bool lwl_slListIsNodeInList(
 	const lwl_SlListNode * pNode
 );

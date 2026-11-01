@@ -212,28 +212,6 @@ inline void lwl_slListStorePtr(
 
 /** ****************************************************************************
  *
- * \brief		Pop the last node.
- *
- * \param		pList 		Pointer to list.
- *
- * \return		Pointer to the popped node. NULL if the list was empty.
- *
- ******************************************************************************/
-inline lwl_SlListNode * lwl_slListPopLast(
-	lwl_SlList * pList
-) {
-	lwl__portAssert(pList != NULL);
-
-	lwl_SlListNode * pNode = lwl_slListPeekLast(pList);
-	if (pNode != NULL) {
-		lwl_slListRemove(pList, pNode);
-	}
-
-	return pNode;
-}
-
-/** ****************************************************************************
- *
  * 	\brief		Check if the supplied node is in a list.
  *
  * 	\param[in]	pNode		The node to check.
