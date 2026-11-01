@@ -114,6 +114,12 @@ extern inline lwl_DlListNode * lwl_dlListPopFirst(
 	lwl_DlList * pList
 );
 
+extern inline void lwl__dlListLink(
+	lwl_DlListNode * pPrevNode,
+	lwl_DlListNode * pNewNode,
+	lwl_DlListNode * pNextNode
+);
+
 extern inline void lwl_dlListInsertBefore(
 	lwl_DlListNode * pListNode,
 	lwl_DlListNode * pNewNode
@@ -248,7 +254,7 @@ static void lwl__dlListInsertFront(
 		/*
 		 * The new node belongs before the first node.
 		 */
-		lwl_dlListInsertBefore(pFirst, pNewNode);
+		lwl__dlListLink(&pList->sentinel, pNewNode, pFirst);
 		return;
 	}
 
@@ -259,5 +265,5 @@ static void lwl__dlListInsertFront(
 		pListNode = pListNode->pPrev;
 	}
 
-	lwl_dlListInsertBefore(pListNode->pNext, pNewNode);
+	lwl__dlListLink(pListNode, pNewNode, pListNode->pNext);
 }

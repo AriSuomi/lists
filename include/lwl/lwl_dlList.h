@@ -353,6 +353,34 @@ inline lwl_DlListNode * lwl_dlListPopFirst(
 
 /** ****************************************************************************
  *
+ * \brief	Link a new node between two adjacent nodes.
+ *
+ * \param	pPrevNode	Pointer to the node that will be before the new node.
+ * \param	pNewNode	Pointer to the node that should be inserted.
+ * \param	pNextNode	Pointer to the node that will be after the new node. It
+ * 						must be pPrevNode->pNext.
+ *
+ * \details	Either node may be the sentinel node. Callers that already know
+ * 			both neighbors use this instead of lwl_dlListInsertBefore() to
+ * 			avoid loading a pointer they already have.
+ *
+ * \note	This function is intended for internal usage only. It should not be
+ * 			called from other code.
+ *
+ ******************************************************************************/
+inline void lwl__dlListLink(
+	lwl_DlListNode * pPrevNode,
+	lwl_DlListNode * pNewNode,
+	lwl_DlListNode * pNextNode
+) {
+	pPrevNode->pNext = pNewNode;
+	pNewNode->pPrev = pPrevNode;
+	pNextNode->pPrev = pNewNode;
+	pNewNode->pNext = pNextNode;
+}
+
+/** ****************************************************************************
+ *
  * 	\brief		Insert a new node into the list before the specified node.
  *
  * 	\param		pListNode	Pointer to node on the list. The new node will be
@@ -368,11 +396,7 @@ inline void lwl_dlListInsertBefore(
 	 * pListNode may be the sentinel node but that does not matter. In that case
 	 * the new node will be inserted last in the list.
 	 */
-	lwl_DlListNode * pPrevNode = pListNode->pPrev;
-	pPrevNode->pNext = pNewNode;
-	pNewNode->pPrev = pPrevNode;
-	pListNode->pPrev = pNewNode;
-	pNewNode->pNext = pListNode;
+	lwl__dlListLink(pListNode->pPrev, pNewNode, pListNode);
 }
 
 /** ****************************************************************************
@@ -417,7 +441,7 @@ inline bool lwl_dlListPushFirst(
 	bool isInList = lwl_dlListIsNodeInList(pNew);
 
 	if (!isInList) {
-		lwl_dlListInsertBefore(pList->sentinel.pNext, pNew);
+		lwl__dlListLink(&pList->sentinel, pNew, pList->sentinel.pNext);
 	}
 
 	return !isInList;
@@ -503,7 +527,7 @@ inline void lwl__dlListInsertBack(
 		 * The search was started from the end of the list, or the new node
 		 * belongs after the last node.
 		 */
-		lwl_dlListInsertBefore(&pList->sentinel, pNewNode);
+		lwl__dlListLink(pLast, pNewNode, &pList->sentinel);
 		return;
 	}
 
