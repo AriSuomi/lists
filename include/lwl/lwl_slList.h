@@ -368,30 +368,30 @@ inline bool lwl_slListInsert(
 	 */
 	lwl_SlListCmpFn * pCmpFn = pCmp->pCmpFn;
 	const void *	  pCmpParam = pCmp->pCmpParam;
-	lwl_SlListNode *  pPrevListNode = &pList->sentinel;
-	lwl_SlListNode *  pListNode = pPrevListNode->pNext;
+	lwl_SlListNode *  pLast = pList->pLast;
 
-	while (pListNode != &pList->sentinel) {
-		bool notFound = pCmpFn(pListNode, pNewNode, pCmpParam);
+	if ((pLast == &pList->sentinel) || pCmpFn(pLast, pNewNode, pCmpParam)) {
+		/*
+		 * The list is empty, or the new node belongs after the last node.
+		 */
+		pNewNode->pNext = &pList->sentinel;
+		pLast->pNext = pNewNode;
+		pList->pLast = pNewNode;
+		return true;
+	}
 
-		if (!notFound) {
-			/*
-			 * Found the spot. The new node should be before this list node.
-			 */
-			pNewNode->pNext = pListNode;
-			pPrevListNode->pNext = pNewNode;
-			return true;
-		}
+	lwl_SlListNode * pPrevListNode = &pList->sentinel;
+	lwl_SlListNode * pListNode = pPrevListNode->pNext;
 
+	while (pCmpFn(pListNode, pNewNode, pCmpParam)) {
 		pPrevListNode = pListNode;
 		pListNode = pListNode->pNext;
 	}
 
 	/*
-	 * Insert the new node into the list.
+	 * Found the spot. The new node should be before this list node.
 	 */
 	pNewNode->pNext = pListNode;
-	pList->pLast = pNewNode;
 	pPrevListNode->pNext = pNewNode;
 
 	return true;
