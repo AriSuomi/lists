@@ -233,17 +233,20 @@ static void lwl__dlListInsertFront(
 ) {
 	lwl_DlListCmpFn * pCmpFn = pCmp->pCmpFn;
 	const void *	  pCmpParam = pCmp->pCmpParam;
+	lwl_DlListNode *  pFirst = pList->sentinel.pNext;
+
+	if ((pFirst == &pList->sentinel) || !pCmpFn(pFirst, pNewNode, pCmpParam)) {
+		/*
+		 * The list is empty, or the new node belongs before the first node.
+		 */
+		lwl_dlListInsertBefore(pFirst, pNewNode);
+		return;
+	}
 
 	/*
 	 * Traverse the list until the right insertion spot is found.
 	 */
-	while (pListNode != &pList->sentinel) {
-		bool foundSpot = pCmpFn(pListNode, pNewNode, pCmpParam);
-
-		if (foundSpot) {
-			break;
-		}
-
+	while (!pCmpFn(pListNode, pNewNode, pCmpParam)) {
 		pListNode = pListNode->pPrev;
 	}
 
