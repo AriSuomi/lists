@@ -81,7 +81,7 @@ struct lwl__slListNode {
  */
 typedef struct {
 	lwl_SlListNode	 sentinel; /**< Sentinel node with first node pointer. 	*/
-	lwl_SlListNode * pLast; /**< Pointer to last node.						*/
+	lwl_SlListNode * pLast;	   /**< Pointer to last node.						*/
 } lwl_SlList;
 
 /** ****************************************************************************
@@ -354,54 +354,47 @@ inline bool lwl_slListInsert(
 	lwl_SlListNode *	  pNewNode,
 	const lwl_SlListCmp * pCmp
 ) {
-	bool wasInserted = false;
-
 	lwl__portAssert(pList != NULL);
 	lwl__portAssert(pNewNode != NULL);
 
 	bool isInList = lwl_slListIsNodeInList(pNewNode);
-
-	if (!isInList) {
-		/*
-		 * The node is not yet in the list. Iterate the list until the correct
-		 * spot is found.
-		 */
-		lwl_SlListCmpFn * pCmpFn = pCmp->pCmpFn;
-		const void *	  pCmpParam = pCmp->pCmpParam;
-		lwl_SlListNode *  pPrevListNode = &pList->sentinel;
-		lwl_SlListNode *  pListNode = pPrevListNode->pNext;
-
-		while (pListNode != &pList->sentinel) {
-			bool notFound = pCmpFn(pListNode, pNewNode, pCmpParam);
-
-			if (!notFound) {
-				/*
-				 * Found the spot. The new node should be before this list node.
-				 */
-				break;
-			}
-
-			pPrevListNode = pListNode;
-			pListNode = pListNode->pNext;
-		}
-
-		/*
-		 * Insert the new node into the list.
-		 */
-		pNewNode->pNext = pListNode;
-
-		if (pListNode == &pList->sentinel) {
-			/*
-			 * The node is inserted as the last node.
-			 */
-			pList->pLast = pNewNode;
-		}
-
-		pPrevListNode->pNext = pNewNode;
-		wasInserted = true;
+	if (isInList) {
+		return false;
 	}
 
-	return wasInserted;
+	/*
+	 * The node is not yet in the list. Iterate the list until the correct
+	 * spot is found.
+	 */
+	lwl_SlListCmpFn * pCmpFn = pCmp->pCmpFn;
+	const void *	  pCmpParam = pCmp->pCmpParam;
+	lwl_SlListNode *  pPrevListNode = &pList->sentinel;
+	lwl_SlListNode *  pListNode = pPrevListNode->pNext;
+
+	while (pListNode != &pList->sentinel) {
+		bool notFound = pCmpFn(pListNode, pNewNode, pCmpParam);
+
+		if (!notFound) {
+			/*
+			 * Found the spot. The new node should be before this list node.
+			 */
+			pNewNode->pNext = pListNode;
+			pPrevListNode->pNext = pNewNode;
+			return true;
+		}
+
+		pPrevListNode = pListNode;
+		pListNode = pListNode->pNext;
+	}
+
+	/*
+	 * Insert the new node into the list.
+	 */
+	pNewNode->pNext = pListNode;
+	pList->pLast = pNewNode;
+	pPrevListNode->pNext = pNewNode;
+
+	return true;
 }
 
 #endif // LWL_SLLIST_H_INCLUDED
