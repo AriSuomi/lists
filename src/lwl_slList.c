@@ -153,7 +153,7 @@ bool lwl_slListRemove(
 
 	if (isInList) {
 		/*
-		 * The node is in a list and the supplied list is not empty.
+		 * The node is in a list.
 		 * Iterate the list until the node is found.
 		 */
 		lwl_SlListNode * pPrevListNode = &pList->sentinel;

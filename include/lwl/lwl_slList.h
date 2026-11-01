@@ -341,8 +341,8 @@ inline bool lwl_slListInsert(
 	}
 
 	/*
-	 * The node is not yet in the list. Iterate the list until the correct
-	 * spot is found.
+	 * The node is not yet in the list. First check if the node should go to
+	 * the tail of the list.
 	 */
 	lwl_SlListCmpFn * pCmpFn = pCmp->pCmpFn;
 	const void *	  pCmpParam = pCmp->pCmpParam;
@@ -357,6 +357,11 @@ inline bool lwl_slListInsert(
 		pList->pLast = pNewNode;
 		return true;
 	}
+
+	/*
+	 * The node did not go to the tail. Iterate the list until the correct
+	 * spot is found.
+	 */
 
 	lwl_SlListNode * pPrevListNode = &pList->sentinel;
 	lwl_SlListNode * pListNode = pPrevListNode->pNext;
