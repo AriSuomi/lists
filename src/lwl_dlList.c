@@ -186,32 +186,41 @@ bool lwl_dlListMoveNode(
 	lwl__portAssert(pList != NULL);
 	lwl__portAssert(pNode != NULL);
 
-	/*
-	 * First remove the node from the list.
-	 */
-	lwl_DlListNode * pNext = pNode->pNext;
-	bool			 success = lwl_dlListRemove(pNode);
-
-	if (success) {
-		bool toTheBack = false;
-
-		if (pNext != &pList->sentinel) {
-			/*
-			 * Check if it should be moved forward or backward in the list.
-			 * Insert the node again by searching for the new spot in the right
-			 * direction.
-			 */
-			toTheBack = pCmp->pCmpFn(pNext, pNode, pCmp->pCmpParam);
-		}
-
-		if (toTheBack) {
-			lwl__dlListInsertBack(pList, pNext->pNext, pNode, pCmp);
-		} else {
-			lwl__dlListInsertFront(pList, pNext->pPrev, pNode, pCmp);
-		}
+	if (!lwl_dlListIsNodeInList(pNode)) {
+		return false;
 	}
 
-	return success;
+	lwl_DlListNode * pNext = pNode->pNext;
+	lwl_DlListNode * pPrev = pNode->pPrev;
+
+	if ((pNext != &pList->sentinel) && pCmp->pCmpFn(pNext, pNode, pCmp->pCmpParam)) {
+		/*
+		 * The node should be moved toward the back of the list. Unlink it and
+		 * insert it at the new spot after pNext.
+		 */
+		pPrev->pNext = pNext;
+		pNext->pPrev = pPrev;
+
+		lwl__dlListInsertBack(pList, pNext->pNext, pNode, pCmp);
+	} else if (
+		(pPrev != &pList->sentinel) &&
+		!pCmp->pCmpFn(pPrev, pNode, pCmp->pCmpParam)
+	) {
+		/*
+		 * The node should be moved toward the front of the list. Unlink it and
+		 * insert it at the new spot before pPrev.
+		 */
+		pPrev->pNext = pNext;
+		pNext->pPrev = pPrev;
+
+		lwl__dlListInsertFront(pList, pPrev->pPrev, pNode, pCmp);
+	} else {
+		/*
+		 * The node is already in the correct spot.
+		 */
+	}
+
+	return true;
 }
 
 /** ****************************************************************************
@@ -235,9 +244,9 @@ static void lwl__dlListInsertFront(
 	const void *	  pCmpParam = pCmp->pCmpParam;
 	lwl_DlListNode *  pFirst = pList->sentinel.pNext;
 
-	if ((pFirst == &pList->sentinel) || !pCmpFn(pFirst, pNewNode, pCmpParam)) {
+	if ((pListNode == &pList->sentinel) || !pCmpFn(pFirst, pNewNode, pCmpParam)) {
 		/*
-		 * The list is empty, or the new node belongs before the first node.
+		 * The new node belongs before the first node.
 		 */
 		lwl_dlListInsertBefore(pFirst, pNewNode);
 		return;

@@ -498,9 +498,10 @@ inline void lwl__dlListInsertBack(
 	const void *	  pCmpParam = pCmp->pCmpParam;
 	lwl_DlListNode *  pLast = pList->sentinel.pPrev;
 
-	if ((pLast == &pList->sentinel) || pCmpFn(pLast, pNewNode, pCmpParam)) {
+	if ((pListNode == &pList->sentinel) || pCmpFn(pLast, pNewNode, pCmpParam)) {
 		/*
-		 * The list is empty, or the new node belongs after the last node.
+		 * The search was started from the end of the list, or the new node
+		 * belongs after the last node.
 		 */
 		lwl_dlListInsertBefore(&pList->sentinel, pNewNode);
 		return;
