@@ -388,38 +388,56 @@ void lwl__heapMoveToEmptyRoot(
 	const void *	pCmpParam = pCmp->pCmpParam;
 	lwl_HeapNode ** pElements = pHeap->pElements;
 
+	lwl__portAssert(nodeCount > 0U);
+
 	/*
-	 * Nodes from this index on have no children. See
+	 * Nodes below this index have two children. Checking against this instead
+	 * of calculating the child index first avoids an overflow, see
 	 * lwl__heapMoveTowardsLeaves.
 	 */
-	uint_fast16_t firstLeafIdx = (uint_fast16_t)(nodeCount >> 1U);
+	uint_fast16_t twoChildEndIdx = (uint_fast16_t)((nodeCount - 1U) >> 1U);
 	uint_fast16_t emptyIdx = 0U;
 
 	/*
-	 * Move the empty position to a leaf.
+	 * Move the empty position to a leaf. Only the node at twoChildEndIdx can
+	 * have a single child, so the loop does not need to check for one.
 	 */
-	while (emptyIdx < firstLeafIdx) {
+	while (emptyIdx < twoChildEndIdx) {
 		uint_fast16_t childIdx =
 			(uint_fast16_t)(((unsigned int)emptyIdx << 1U) + 1U);
 
-		lwl_HeapNode * pFirst = pElements[childIdx];
-
-		uint_fast16_t rightIdx = (uint_fast16_t)(childIdx + 1U);
-		if (rightIdx < nodeCount) {
-			/*
-			 * There is a left and right child. Check which one should be first
-			 * in the heap.
-			 */
-			lwl_HeapNode * pRight = pElements[rightIdx];
-			if (pCmpFn(pRight, pFirst, pCmpParam)) {
-				pFirst = pRight;
-				childIdx = rightIdx;
-			}
+		/*
+		 * There is a left and right child. Check which one should be first in
+		 * the heap.
+		 */
+		if (pCmpFn(pElements[childIdx + 1U], pElements[childIdx], pCmpParam)) {
+			childIdx++;
 		}
+
+		/*
+		 * Loading the child again is cheaper than keeping both child pointers
+		 * in registers across the call: it avoids spilling other variables to
+		 * the stack.
+		 */
+		lwl_HeapNode * pFirst = pElements[childIdx];
 
 		pElements[emptyIdx] = pFirst;
 		pFirst->heapIdx = (lwl_HeapIdx)emptyIdx;
 
+		emptyIdx = childIdx;
+	}
+
+	/*
+	 * The empty position is now at or after twoChildEndIdx. If it is still
+	 * before the first leaf, the node count is even and the position has only
+	 * a left child, which is the last node.
+	 */
+	if (emptyIdx < (uint_fast16_t)(nodeCount >> 1U)) {
+		uint_fast16_t  childIdx = (uint_fast16_t)(nodeCount - 1U);
+		lwl_HeapNode * pChild = pElements[childIdx];
+
+		pElements[emptyIdx] = pChild;
+		pChild->heapIdx = (lwl_HeapIdx)emptyIdx;
 		emptyIdx = childIdx;
 	}
 
