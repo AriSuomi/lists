@@ -203,10 +203,10 @@ bool lwl_heapRemove(
 ) {
 	lwl__portAssert(pHeap != NULL);
 
-	if (pHeap->nodeCount == 0U) {
-		return false;
-	}
-
+	/*
+	 * This also covers an empty heap: no node index is below a node count of
+	 * zero.
+	 */
 	bool isInHeap = lwl_heapIsNodeInHeap(pHeap, pNode);
 	if (!isInHeap) {
 		return false;
