@@ -500,6 +500,49 @@ inline lwl_DlListNode * lwl_dlListPeekNext(
 
 /** ****************************************************************************
  *
+ * 	\brief		Get the next link of a node without any checks.
+ *
+ * 	\param[in]	pNode		Pointer to a list node.
+ *
+ * 	\return		The node's next link. This is the list's sentinel if the node
+ * 				is the last node, and NULL if the node isn't in any list.
+ *
+ * 	\details	Unlike lwl_dlListPeekNext(), this function does not need the
+ * 				list and does not hide the sentinel. Never use the returned
+ * 				pointer as a node of the list without checking it.
+ *
+ ******************************************************************************/
+inline lwl_DlListNode * lwl_dlListGetNextLink(
+	const lwl_DlListNode * pNode
+) {
+	lwl__portAssert(pNode != NULL);
+
+	return pNode->pNext;
+}
+
+/** ****************************************************************************
+ *
+ * 	\brief		Get the previous link of a node without any checks.
+ *
+ * 	\param[in]	pNode		Pointer to a list node.
+ *
+ * 	\return		The node's previous link. This is the list's sentinel if the
+ * 				node is the first node, and NULL if the node isn't in any list.
+ *
+ * 	\details	Never use the returned pointer as a node of the list without
+ * 				checking it.
+ *
+ ******************************************************************************/
+inline lwl_DlListNode * lwl_dlListGetPrevLink(
+	const lwl_DlListNode * pNode
+) {
+	lwl__portAssert(pNode != NULL);
+
+	return pNode->pPrev;
+}
+
+/** ****************************************************************************
+ *
  * \brief	Insert node to the correct spot at or after the specified node.
  *
  * \param	pList		Pointer to the list.

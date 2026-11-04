@@ -64,11 +64,6 @@
 ;
 ;-----------------------------------------------------------------------------*/
 
-/**
- * Invalid list index value. Used for nodes not on the list.
- */
-#define LWL__MDLLIST_INVALID_IDX 255U
-
 /*******************************************************************************
 ;
 ;	T Y P E S
@@ -100,7 +95,6 @@ inline void lwl_mdlListNodeInit(
 	lwl__portAssert(pNode != NULL);
 
 	lwl_dlListNodeInit(&pNode->dlListNode);
-	pNode->listIdx = LWL__MDLLIST_INVALID_IDX;
 }
 
 /** ****************************************************************************
@@ -166,7 +160,6 @@ inline bool lwl_mdlListInsert(
 		);
 
 		if (wasInserted) {
-			pNew->listIdx = listIdx;
 			pMdlList->listMap |= (uint16_t)(1U << listIdx);
 		}
 
@@ -242,23 +235,26 @@ inline bool lwl_mdlListRemove(
 	lwl__portAssert(pMdlList != NULL);
 	lwl__portAssert(pNode != NULL);
 
+	/* Get the neighbors before the node is unlinked. */
+	lwl_DlListNode * pPrev = lwl_dlListGetPrevLink(&pNode->dlListNode);
+	lwl_DlListNode * pNext = lwl_dlListGetNextLink(&pNode->dlListNode);
+
 	bool wasRemoved = lwl_dlListRemove(&pNode->dlListNode);
 
-	if (wasRemoved) {
-		lwl__portAssert(pNode->listIdx != LWL__MDLLIST_INVALID_IDX);
+	/*
+	 * The neighbors are the same node only if both are the sentinel, so the
+	 * node was the last one in its list. (Both are NULL if the node was not in
+	 * a list, so check wasRemoved first.)
+	 */
+	if (wasRemoved && (pPrev == pNext)) {
+		/*
+		 * The sentinel is the first member of the list, so its address gives
+		 * the list index. Clear the bit in the list map.
+		 */
+		ptrdiff_t listIdx = (lwl_DlList *)pPrev - pMdlList->pLists;
+		lwl__portAssert((listIdx >= 0) && (listIdx < (ptrdiff_t)(sizeof(uint16_t) * CHAR_BIT)));
 
-		uint_fast8_t	 listIdx = pNode->listIdx;
-		lwl_DlList *	 pList = &pMdlList->pLists[listIdx];
-		lwl_DlListNode * pLastNode = lwl_dlListPeekLast(pList);
-		if (pLastNode == NULL) {
-			/*
-			 * The last node was removed from this list. Clear the bit in the list
-			 * map.
-			 */
-			pMdlList->listMap &= (uint16_t)(~(1U << listIdx));
-		}
-
-		pNode->listIdx = LWL__MDLLIST_INVALID_IDX;
+		pMdlList->listMap &= (uint16_t)(~(1U << (unsigned int)listIdx));
 	}
 
 	return wasRemoved;

@@ -144,6 +144,14 @@ extern inline lwl_DlListNode * lwl_dlListPeekNext(
 	const lwl_DlListNode * pNode
 );
 
+extern inline lwl_DlListNode * lwl_dlListGetNextLink(
+	const lwl_DlListNode * pNode
+);
+
+extern inline lwl_DlListNode * lwl_dlListGetPrevLink(
+	const lwl_DlListNode * pNode
+);
+
 extern inline void lwl__dlListInsertBack(
 	lwl_DlList *		  pList,
 	lwl_DlListNode *	  pListNode,
