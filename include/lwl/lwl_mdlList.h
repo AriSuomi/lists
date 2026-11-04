@@ -302,9 +302,30 @@ static inline lwl_MdlListNode * lwl_mdlListPopFirst(
 ) {
 	lwl__portAssert(pMdlList != NULL);
 
-	lwl_MdlListNode * pNode = lwl_mdlListPeekFirst(pMdlList);
-	if (pNode != NULL) {
-		lwl_mdlListRemove(pMdlList, pNode);
+	lwl_MdlListNode * pNode = NULL;
+
+	uint16_t listMap = pMdlList->listMap;
+	if (listMap != 0U) {
+		uint_fast8_t listIdx = (uint_fast8_t)(((sizeof(listMap) * CHAR_BIT) - 1U) - lwl__portClz16(listMap));
+		lwl_DlList * pList = &pMdlList->pLists[listIdx];
+
+		/*
+		 * The list becomes empty if the first node is followed by the
+		 * sentinel. Check it before popping, so that the links are read only
+		 * once.
+		 */
+		lwl_DlListNode * pFirst = lwl_dlListGetNextLink(&pList->sentinel);
+		bool			 isLast = (lwl_dlListGetNextLink(pFirst) == &pList->sentinel);
+
+		pNode = (lwl_MdlListNode *)lwl_dlListPopFirst(pList);
+
+		if (isLast) {
+			/*
+			 * The last node was popped from this list. Clear the bit in the
+			 * list map.
+			 */
+			pMdlList->listMap = (uint16_t)(listMap & ~(1U << listIdx));
+		}
 	}
 
 	return pNode;
