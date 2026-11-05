@@ -549,28 +549,33 @@ inline lwl_DlListNode * lwl_dlListGetPrevLink(
  * \param	pListNode	Pointer to node on the list. The search for the correct
  * 						insertion spot will start from this node.
  * \param	pNewNode	The new node that should be inserted.
- * \param	pCmp		Pointer to comparison information.
+ * \param	pCmpFn		Pointer to the node compare function.
+ * \param	pCmpParam	Parameter passed to the compare function.
  *
  * \note	This function is intended for internal usage only. It should not be
  * 			called from other code.
  *
  ******************************************************************************/
 inline void lwl__dlListInsertBack(
-	lwl_DlList *		  pList,
-	lwl_DlListNode *	  pListNode,
-	lwl_DlListNode *	  pNewNode,
-	const lwl_DlListCmp * pCmp
+	lwl_DlList *	  pList,
+	lwl_DlListNode *  pListNode,
+	lwl_DlListNode *  pNewNode,
+	lwl_DlListCmpFn * pCmpFn,
+	const void *	  pCmpParam
 ) {
-	lwl_DlListCmpFn * pCmpFn = pCmp->pCmpFn;
-	const void *	  pCmpParam = pCmp->pCmpParam;
-	lwl_DlListNode *  pLast = pList->sentinel.pPrev;
-
-	if ((pListNode == &pList->sentinel) || pCmpFn(pLast, pNewNode, pCmpParam)) {
+	if (
+		(pListNode == &pList->sentinel) ||
+		pCmpFn(pList->sentinel.pPrev, pNewNode, pCmpParam)
+	) {
 		/*
 		 * The search was started from the end of the list, or the new node
 		 * belongs after the last node.
 		 */
-		lwl__dlListLink(pLast, pNewNode, &pList->sentinel);
+		lwl_DlListNode * pLast = pList->sentinel.pPrev;
+		pNewNode->pNext = &pList->sentinel;
+		pNewNode->pPrev = pLast;
+		pLast->pNext = pNewNode;
+		pList->sentinel.pPrev = pNewNode;
 		return;
 	}
 
@@ -614,7 +619,8 @@ inline bool lwl_dlListInsert(
 			pList,
 			pList->sentinel.pNext,
 			pNewNode,
-			pCmp
+			pCmp->pCmpFn,
+			pCmp->pCmpParam
 		);
 	}
 

@@ -69,10 +69,11 @@
 ;-----------------------------------------------------------------------------*/
 
 static void lwl__dlListInsertFront(
-	lwl_DlList *		  pList,
-	lwl_DlListNode *	  pListNode,
-	lwl_DlListNode *	  pNewNode,
-	const lwl_DlListCmp * pCmp
+	lwl_DlList *	  pList,
+	lwl_DlListNode *  pListNode,
+	lwl_DlListNode *  pNewNode,
+	lwl_DlListCmpFn * pCmpFn,
+	const void *	  pCmpParam
 );
 
 /*******************************************************************************
@@ -153,10 +154,11 @@ extern inline lwl_DlListNode * lwl_dlListGetPrevLink(
 );
 
 extern inline void lwl__dlListInsertBack(
-	lwl_DlList *		  pList,
-	lwl_DlListNode *	  pListNode,
-	lwl_DlListNode *	  pNewNode,
-	const lwl_DlListCmp * pCmp
+	lwl_DlList *	  pList,
+	lwl_DlListNode *  pListNode,
+	lwl_DlListNode *  pNewNode,
+	lwl_DlListCmpFn * pCmpFn,
+	const void *	  pCmpParam
 );
 
 extern inline bool lwl_dlListInsert(
@@ -204,34 +206,40 @@ bool lwl_dlListMoveNode(
 		return false;
 	}
 
-	lwl_DlListNode * pNext = pNode->pNext;
-	lwl_DlListNode * pPrev = pNode->pPrev;
+	lwl_DlListNode *  pNext = pNode->pNext;
+	lwl_DlListCmpFn * pCmpFn = pCmp->pCmpFn;
+	const void *	  pCmpParam = pCmp->pCmpParam;
 
-	if ((pNext != &pList->sentinel) && pCmp->pCmpFn(pNext, pNode, pCmp->pCmpParam)) {
+	if ((pNext != &pList->sentinel) && pCmpFn(pNext, pNode, pCmpParam)) {
 		/*
 		 * The node should be moved toward the back of the list. Unlink it and
 		 * insert it at the new spot after pNext.
 		 */
+		lwl_DlListNode * pPrev = pNode->pPrev;
 		pPrev->pNext = pNext;
 		pNext->pPrev = pPrev;
+		lwl__dlListInsertBack(pList, pNext->pNext, pNode, pCmpFn, pCmpParam);
 
-		lwl__dlListInsertBack(pList, pNext->pNext, pNode, pCmp);
-	} else if (
-		(pPrev != &pList->sentinel) &&
-		!pCmp->pCmpFn(pPrev, pNode, pCmp->pCmpParam)
-	) {
-		/*
-		 * The node should be moved toward the front of the list. Unlink it and
-		 * insert it at the new spot before pPrev.
-		 */
-		pPrev->pNext = pNext;
-		pNext->pPrev = pPrev;
-
-		lwl__dlListInsertFront(pList, pPrev->pPrev, pNode, pCmp);
 	} else {
-		/*
-		 * The node is already in the correct spot.
-		 */
+		lwl_DlListNode * pPrev = pNode->pPrev;
+
+		if ((pPrev != &pList->sentinel) && !pCmpFn(pPrev, pNode, pCmpParam)) {
+			/*
+			 * The node should be moved toward the front of the list. Unlink it
+			 * and insert it at the new spot before pPrev.
+			 */
+			pNext = pNode->pNext;
+			pPrev->pNext = pNext;
+			pNext->pPrev = pPrev;
+
+			lwl__dlListInsertFront(
+				pList,
+				pPrev->pPrev,
+				pNode,
+				pCmpFn,
+				pCmpParam
+			);
+		}
 	}
 
 	return true;
@@ -245,24 +253,25 @@ bool lwl_dlListMoveNode(
  * \param	pListNode	Pointer to node on the list. The search for the correct
  * 						insertion spot will start from this node.
  * \param	pNewNode	The new node that should be inserted.
- * \param	pCmp		Pointer to comparison information.
+ * \param	pCmpFn		Pointer to the node compare function.
+ * \param	pCmpParam	Parameter passed to the compare function.
  *
  ******************************************************************************/
 static void lwl__dlListInsertFront(
-	lwl_DlList *		  pList,
-	lwl_DlListNode *	  pListNode,
-	lwl_DlListNode *	  pNewNode,
-	const lwl_DlListCmp * pCmp
+	lwl_DlList *	  pList,
+	lwl_DlListNode *  pListNode,
+	lwl_DlListNode *  pNewNode,
+	lwl_DlListCmpFn * pCmpFn,
+	const void *	  pCmpParam
 ) {
-	lwl_DlListCmpFn * pCmpFn = pCmp->pCmpFn;
-	const void *	  pCmpParam = pCmp->pCmpParam;
-	lwl_DlListNode *  pFirst = pList->sentinel.pNext;
-
-	if ((pListNode == &pList->sentinel) || !pCmpFn(pFirst, pNewNode, pCmpParam)) {
+	if (
+		(pListNode == &pList->sentinel) ||
+		!pCmpFn(pList->sentinel.pNext, pNewNode, pCmpParam)
+	) {
 		/*
 		 * The new node belongs before the first node.
 		 */
-		lwl__dlListLink(&pList->sentinel, pNewNode, pFirst);
+		lwl__dlListLink(&pList->sentinel, pNewNode, pList->sentinel.pNext);
 		return;
 	}
 
